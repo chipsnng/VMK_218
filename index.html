@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>218 ВМК МГУ</title>
   
   <link rel="manifest" href="manifest.json">
@@ -12,84 +12,227 @@
   <meta name="apple-mobile-web-app-title" content="218 ВМК">
   
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen pb-12 font-sans">
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col font-sans select-none">
 
-  <header class="bg-slate-800 border-b border-slate-700 p-4 sticky top-0 z-10 shadow-lg">
+  <!-- Шапка -->
+  <header class="bg-slate-800 border-b border-slate-700/80 p-4 sticky top-0 z-20 shadow-lg">
     <div class="max-w-md mx-auto flex justify-between items-center">
       <div>
         <h1 class="font-bold text-lg text-blue-400">218 Группа</h1>
-        <p class="text-xs text-slate-400">ВМК МГУ им. М.В. Ломоносова</p>
+        <p class="text-xs text-slate-400" id="current-month-year">ВМК МГУ</p>
       </div>
-      <span class="text-xs bg-blue-900/60 text-blue-300 border border-blue-700/50 px-3 py-1 rounded-full">
-        Осенний семестр
-      </span>
+      <button onclick="goToToday()" class="text-xs bg-blue-600/30 hover:bg-blue-600/50 text-blue-300 border border-blue-500/40 px-3 py-1.5 rounded-xl font-medium transition">
+        Сегодня
+      </button>
     </div>
   </header>
 
-  <main class="max-w-md mx-auto p-4 space-y-4" id="schedule-container">
-    <p class="text-center text-slate-500 text-sm py-8">Загрузка расписания...</p>
+  <!-- Календарная неделя -->
+  <div class="bg-slate-800/50 border-b border-slate-800 sticky top-[65px] z-10 backdrop-blur-md">
+    <div class="max-w-md mx-auto px-2 py-3">
+      <div class="flex items-center justify-between mb-2 px-2 text-xs text-slate-400 font-medium">
+        <button onclick="changeWeek(-1)" class="p-1 hover:text-white">← Пред. неделя</button>
+        <span id="week-range-label" class="text-slate-300"></span>
+        <button onclick="changeWeek(1)" class="p-1 hover:text-white">След. неделя →</button>
+      </div>
+      <div class="grid grid-cols-7 gap-1 text-center" id="week-days-container">
+        <!-- Дни недели генерируются скриптом -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Контент расписания -->
+  <main class="max-w-md mx-auto p-4 flex-1 w-full" id="touch-area">
+    <div id="schedule-container" class="transition-opacity duration-200">
+      <p class="text-center text-slate-500 text-sm py-12">Загрузка расписания...</p>
+    </div>
   </main>
 
   <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js');
+    let scheduleData = null;
+    let currentMonday = getMonday(new Date());
+    let selectedDate = new Date();
+
+    const dayNames = ["Воскресенье", "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"];
+    const monthNames = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"];
+
+    function getMonday(d) {
+      const date = new Date(d);
+      const day = date.getDay();
+      const diff = date.getDate() - day + (day === 0 ? -6 : 1);
+      return new Date(date.setDate(diff));
     }
 
-    async function loadSchedule() {
+    function isSameDate(d1, d2) {
+      return d1.getFullYear() === d2.getFullYear() &&
+             d1.getMonth() === d2.getMonth() &&
+             d1.getDate() === d2.getDate();
+    }
+
+    async function init() {
+      if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
       try {
         const response = await fetch('schedule.json');
-        const data = await response.json();
-        renderSchedule(data);
+        scheduleData = await response.json();
+        renderCalendar();
+        renderDaySchedule(selectedDate);
       } catch (err) {
         document.getElementById('schedule-container').innerHTML = 
           '<p class="text-red-400 text-center">Ошибка загрузки расписания</p>';
       }
     }
 
-    function renderSchedule(data) {
-      const container = document.getElementById('schedule-container');
+    function renderCalendar() {
+      const container = document.getElementById('week-days-container');
       container.innerHTML = '';
 
-      data.days.forEach(dayData => {
-        const dayCard = document.createElement('div');
-        dayCard.className = "bg-slate-800/80 border border-slate-700/60 rounded-2xl p-4 shadow-md backdrop-blur mb-4";
+      const sunday = new Date(currentMonday);
+      sunday.setDate(sunday.getDate() + 6);
 
-        let lessonsHTML = dayData.lessons.map(lesson => {
-          const isLecture = lesson.type === 'Лекция';
-          const badgeColor = isLecture 
-            ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' 
-            : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
+      document.getElementById('week-range-label').innerText = 
+        `${currentMonday.getDate()} ${monthNames[currentMonday.getMonth()].slice(0, 3)} — ${sunday.getDate()} ${monthNames[sunday.getMonth()].slice(0, 3)}`;
 
-          return `
-            <div class="my-3 p-3 bg-slate-900/60 rounded-xl border border-slate-800">
-              <div class="flex justify-between items-start mb-1">
-                <span class="text-xs font-semibold text-slate-400">${lesson.time}</span>
-                <span class="text-[10px] px-2 py-0.5 rounded-md border ${badgeColor}">
-                  ${lesson.type}
-                </span>
-              </div>
-              <div class="font-semibold text-slate-100 text-base mb-1">${lesson.subject}</div>
-              <div class="flex justify-between items-center text-xs text-slate-400 mt-2 pt-2 border-t border-slate-800/80">
-                <span>📍 Ауд. ${lesson.room}</span>
-                <span>👤 ${lesson.teacher}</span>
-              </div>
-            </div>
-          `;
-        }).join('');
+      document.getElementById('current-month-year').innerText = 
+        `${monthNames[selectedDate.getMonth()]} ${selectedDate.getFullYear()}`;
 
-        dayCard.innerHTML = `
-          <h2 class="font-bold text-slate-200 text-lg mb-2 flex items-center gap-2">
-            <span class="w-2 h-2 rounded-full bg-blue-500"></span>
-            ${dayData.day}
-          </h2>
-          ${lessonsHTML}
+      for (let i = 0; i < 7; i++) {
+        const date = new Date(currentMonday);
+        date.setDate(date.getDate() + i);
+
+        const isSelected = isSameDate(date, selectedDate);
+        const isToday = isSameDate(date, new Date());
+
+        const dayBtn = document.createElement('button');
+        dayBtn.className = `flex flex-col items-center py-2 px-1 rounded-xl transition ${
+          isSelected 
+            ? 'bg-blue-600 text-white font-bold shadow-lg shadow-blue-600/30' 
+            : isToday 
+              ? 'bg-slate-700/70 text-blue-400 font-semibold border border-blue-500/30' 
+              : 'text-slate-400 hover:bg-slate-800'
+        }`;
+
+        const shortDays = ["Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"];
+        dayBtn.innerHTML = `
+          <span class="text-[10px] uppercase mb-0.5 opacity-80">${shortDays[date.getDay()]}</span>
+          <span class="text-sm">${date.getDate()}</span>
         `;
-        container.appendChild(dayCard);
-      });
+
+        dayBtn.onclick = () => {
+          selectedDate = new Date(date);
+          renderCalendar();
+          renderDaySchedule(selectedDate);
+        };
+
+        container.appendChild(dayBtn);
+      }
     }
 
-    loadSchedule();
+    function renderDaySchedule(date) {
+      const container = document.getElementById('schedule-container');
+      const dayIndex = date.getDay(); 
+      const dayName = dayNames[dayIndex];
+
+      if (dayIndex === 0) {
+        container.innerHTML = `
+          <div class="text-center py-16 text-slate-500">
+            <div class="text-4xl mb-2">☕</div>
+            <p class="font-medium text-slate-400">Воскресенье — выходной!</p>
+            <p class="text-xs mt-1">Отдыхайте и набирайтесь сил.</p>
+          </div>`;
+        return;
+      }
+
+      const dayData = scheduleData.days.find(d => d.day === dayName);
+
+      if (!dayData || !dayData.lessons || dayData.lessons.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-16 text-slate-500">
+            <p class="font-medium text-slate-400">Занятий нет</p>
+          </div>`;
+        return;
+      }
+
+      let lessonsHTML = dayData.lessons.map(lesson => {
+        const isLecture = lesson.type === 'Лекция';
+        const badgeColor = isLecture 
+          ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' 
+          : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
+
+        return `
+          <div class="p-4 bg-slate-800/90 border border-slate-700/70 rounded-2xl shadow-md mb-3">
+            <div class="flex justify-between items-start mb-1.5">
+              <span class="text-xs font-bold text-blue-400 bg-blue-950/50 px-2.5 py-1 rounded-lg border border-blue-800/40">
+                ${lesson.time}
+              </span>
+              <span class="text-[11px] px-2.5 py-0.5 rounded-md border font-medium ${badgeColor}">
+                ${lesson.type}
+              </span>
+            </div>
+            <div class="font-semibold text-slate-100 text-base my-2">${lesson.subject}</div>
+            <div class="flex justify-between items-center text-xs text-slate-400 pt-2 border-t border-slate-700/50">
+              <span class="flex items-center gap-1">📍 Аудитория <b>${lesson.room}</b></span>
+              <span class="truncate max-w-[160px]">👤 ${lesson.teacher}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      container.innerHTML = `
+        <div class="mb-3 px-1 flex justify-between items-baseline">
+          <h2 class="font-bold text-slate-200 text-lg">${dayName}</h2>
+          <span class="text-xs text-slate-400">${date.getDate()} ${monthNames[date.getMonth()]}</span>
+        </div>
+        ${lessonsHTML}
+      `;
+    }
+
+    function changeWeek(direction) {
+      currentMonday.setDate(currentMonday.getDate() + (direction * 7));
+      selectedDate = new Date(currentMonday);
+      renderCalendar();
+      renderDaySchedule(selectedDate);
+    }
+
+    function goToToday() {
+      selectedDate = new Date();
+      currentMonday = getMonday(selectedDate);
+      renderCalendar();
+      renderDaySchedule(selectedDate);
+    }
+
+    // Обработка Свайпов влево/вправо
+    let touchStartX = 0;
+    let touchEndX = 0;
+    const touchArea = document.getElementById('touch-area');
+
+    touchArea.addEventListener('touchstart', e => touchStartX = e.changedTouches[0].screenX, false);
+    touchArea.addEventListener('touchend', e => {
+      touchEndX = e.changedTouches[0].screenX;
+      handleSwipe();
+    }, false);
+
+    function handleSwipe() {
+      const diff = touchStartX - touchEndX;
+      if (Math.abs(diff) > 50) {
+        if (diff > 0) {
+          // Свайп влево -> следующий день
+          selectedDate.setDate(selectedDate.getDate() + 1);
+        } else {
+          // Свайп вправо -> предыдущий день
+          selectedDate.setDate(selectedDate.getDate() - 1);
+        }
+        currentMonday = getMonday(selectedDate);
+        renderCalendar();
+        renderDaySchedule(selectedDate);
+      }
+    }
+
+    init();
   </script>
 </body>
 </html>
