@@ -13,42 +13,29 @@
   
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    /* Отключение выделения текста для ощущения нативного PWA */
     body {
       -webkit-tap-highlight-color: transparent;
       -webkit-touch-callout: none;
       user-select: none;
     }
 
-    /* Плавные переходы для анимации переключения */
-    .page-transition {
-      transition: transform 0.22s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.22s ease-out;
-      will-change: transform, opacity;
+    /* Контейнер для плавного скролла за пальцем */
+    .snap-slider {
+      display: flex;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
     }
 
-    .slide-left-out {
-      transform: translate3d(-100%, 0, 0);
-      opacity: 0;
+    .snap-slider::-webkit-scrollbar {
+      display: none;
     }
 
-    .slide-right-out {
-      transform: translate3d(100%, 0, 0);
-      opacity: 0;
-    }
-
-    .slide-left-in {
-      transform: translate3d(100%, 0, 0);
-      opacity: 0;
-    }
-
-    .slide-right-in {
-      transform: translate3d(-100%, 0, 0);
-      opacity: 0;
-    }
-
-    .slide-active {
-      transform: translate3d(0, 0, 0);
-      opacity: 1;
+    .snap-item {
+      scroll-snap-align: start;
+      flex: 0 0 100%;
+      width: 100%;
     }
   </style>
 </head>
@@ -81,10 +68,10 @@
     </div>
   </div>
 
-  <!-- Главный блок с расписанием -->
-  <main class="max-w-md mx-auto p-4 flex-1 w-full" id="touch-area">
-    <div id="schedule-container" class="page-transition slide-active">
-      <p class="text-center text-slate-500 text-sm py-12">Загрузка расписания...</p>
+  <!-- Слайдер расписания (тянется за пальцем) -->
+  <main class="max-w-md mx-auto flex-1 w-full overflow-hidden">
+    <div id="slider-container" class="snap-slider h-full">
+      <!-- Экраны дней генерируются автоматически -->
     </div>
   </main>
 
@@ -92,6 +79,7 @@
     let scheduleData = null;
     let currentMonday = getMonday(new Date());
     let selectedDate = new Date();
+    let isProgrammaticScroll = false;
 
     const dayNames = ["Воскресенье", "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"];
     const monthNames = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"];
@@ -114,15 +102,36 @@
       try {
         const response = await fetch('schedule.json');
         scheduleData = await response.json();
-        renderCalendar();
-        renderDaySchedule(selectedDate);
+        renderWeekPages();
+        setupScrollListener();
       } catch (err) {
-        document.getElementById('schedule-container').innerHTML = 
-          '<p class="text-red-400 text-center">Ошибка загрузки расписания</p>';
+        document.getElementById('slider-container').innerHTML = 
+          '<div class="w-full p-4 text-center text-red-400">Ошибка загрузки расписания</div>';
       }
     }
 
-    function renderCalendar() {
+    function renderWeekPages() {
+      const slider = document.getElementById('slider-container');
+      slider.innerHTML = '';
+
+      renderCalendarHeader();
+
+      for (let i = 0; i < 7; i++) {
+        const date = new Date(currentMonday);
+        date.setDate(date.getDate() + i);
+
+        const page = document.createElement('div');
+        page.className = 'snap-item p-4 box-border';
+        page.dataset.date = date.toISOString();
+        page.innerHTML = getDayScheduleHTML(date);
+
+        slider.appendChild(page);
+      }
+
+      scrollToSelectedDate(false);
+    }
+
+    function renderCalendarHeader() {
       const container = document.getElementById('week-days-container');
       container.innerHTML = '';
 
@@ -158,63 +167,35 @@
         `;
 
         dayBtn.onclick = () => {
-          const dir = date > selectedDate ? 'next' : 'prev';
-          switchDay(new Date(date), dir);
+          selectedDate = new Date(date);
+          renderCalendarHeader();
+          scrollToSelectedDate(true);
         };
 
         container.appendChild(dayBtn);
       }
     }
 
-    function switchDay(newDate, direction) {
-      if (isSameDate(newDate, selectedDate)) return;
-
-      const container = document.getElementById('schedule-container');
-      const outClass = direction === 'next' ? 'slide-left-out' : 'slide-right-out';
-      const inClass = direction === 'next' ? 'slide-left-in' : 'slide-right-in';
-
-      container.className = `page-transition ${outClass}`;
-
-      setTimeout(() => {
-        selectedDate = newDate;
-        renderCalendar();
-        renderDaySchedule(selectedDate);
-
-        container.style.transition = 'none';
-        container.className = inClass;
-
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            container.style.transition = '';
-            container.className = 'page-transition slide-active';
-          });
-        });
-      }, 180);
-    }
-
-    function renderDaySchedule(date) {
-      const container = document.getElementById('schedule-container');
+    function getDayScheduleHTML(date) {
       const dayIndex = date.getDay(); 
       const dayName = dayNames[dayIndex];
 
       if (dayIndex === 0) {
-        container.innerHTML = `
+        return `
           <div class="text-center py-16 text-slate-500">
             <div class="text-5xl mb-3">☕</div>
             <p class="font-medium text-slate-300 text-base">Воскресенье — выходной!</p>
-            <p class="text-xs text-slate-500 mt-1">Хорошего отдыха перед учебной неделей.</p>
+            <p class="text-xs text-slate-500 mt-1">Отдыхайте и набирайтесь сил.</p>
           </div>`;
-        return;
       }
 
       const dayData = scheduleData.days.find(d => d.day === dayName);
 
       if (!dayData || !dayData.lessons || dayData.lessons.length === 0) {
-        container.innerHTML = `
+        return `
           <div class="text-center py-16 text-slate-500">
             <p class="font-medium text-slate-400">Занятий нет</p>
           </div>`;
-        return;
       }
 
       let lessonsHTML = dayData.lessons.map(lesson => {
@@ -242,7 +223,7 @@
         `;
       }).join('');
 
-      container.innerHTML = `
+      return `
         <div class="mb-3 px-1 flex justify-between items-baseline">
           <h2 class="font-bold text-slate-200 text-lg">${dayName}</h2>
           <span class="text-xs text-slate-400 font-medium">${date.getDate()} ${monthNames[date.getMonth()]}</span>
@@ -251,44 +232,51 @@
       `;
     }
 
+    function scrollToSelectedDate(smooth = true) {
+      const slider = document.getElementById('slider-container');
+      const dayIndex = (selectedDate.getDay() + 6) % 7; 
+      const targetX = slider.clientWidth * dayIndex;
+
+      isProgrammaticScroll = true;
+      slider.scrollTo({
+        left: targetX,
+        behavior: smooth ? 'smooth' : 'auto'
+      });
+
+      setTimeout(() => { isProgrammaticScroll = false; }, 350);
+    }
+
+    function setupScrollListener() {
+      const slider = document.getElementById('slider-container');
+      let timeout = null;
+
+      slider.addEventListener('scroll', () => {
+        if (isProgrammaticScroll) return;
+
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
+          const index = Math.round(slider.scrollLeft / slider.clientWidth);
+          const newDate = new Date(currentMonday);
+          newDate.setDate(newDate.getDate() + index);
+
+          if (!isSameDate(newDate, selectedDate)) {
+            selectedDate = newDate;
+            renderCalendarHeader();
+          }
+        }, 50);
+      });
+    }
+
     function changeWeek(direction) {
       currentMonday.setDate(currentMonday.getDate() + (direction * 7));
-      const newDate = new Date(currentMonday);
-      switchDay(newDate, direction > 0 ? 'next' : 'prev');
+      selectedDate = new Date(currentMonday);
+      renderWeekPages();
     }
 
     function goToToday() {
-      const today = new Date();
-      const dir = today > selectedDate ? 'next' : 'prev';
-      currentMonday = getMonday(today);
-      switchDay(today, dir);
-    }
-
-    // Обработка свайпов
-    let touchStartX = 0;
-    let touchEndX = 0;
-    const touchArea = document.getElementById('touch-area');
-
-    touchArea.addEventListener('touchstart', e => touchStartX = e.changedTouches[0].screenX, false);
-    touchArea.addEventListener('touchend', e => {
-      touchEndX = e.changedTouches[0].screenX;
-      handleSwipe();
-    }, false);
-
-    function handleSwipe() {
-      const diff = touchStartX - touchEndX;
-      if (Math.abs(diff) > 40) {
-        const targetDate = new Date(selectedDate);
-        if (diff > 0) {
-          targetDate.setDate(targetDate.getDate() + 1);
-          currentMonday = getMonday(targetDate);
-          switchDay(targetDate, 'next');
-        } else {
-          targetDate.setDate(targetDate.getDate() - 1);
-          currentMonday = getMonday(targetDate);
-          switchDay(targetDate, 'prev');
-        }
-      }
+      selectedDate = new Date();
+      currentMonday = getMonday(selectedDate);
+      renderWeekPages();
     }
 
     init();
