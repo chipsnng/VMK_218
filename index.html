@@ -15,9 +15,40 @@
   <style>
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    /* Стили для анимации переключения */
+    #schedule-container {
+      transition: transform 0.2s ease-out, opacity 0.2s ease-out;
+      will-change: transform, opacity;
+    }
+
+    .slide-out-left {
+      transform: translateX(-30px);
+      opacity: 0;
+    }
+
+    .slide-out-right {
+      transform: translateX(30px);
+      opacity: 0;
+    }
+
+    .slide-in-left {
+      transform: translateX(-30px);
+      opacity: 0;
+    }
+
+    .slide-in-right {
+      transform: translateX(30px);
+      opacity: 0;
+    }
+
+    .slide-active {
+      transform: translateX(0);
+      opacity: 1;
+    }
   </style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col font-sans select-none">
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col font-sans select-none overflow-x-hidden">
 
   <!-- Шапка -->
   <header class="bg-slate-800 border-b border-slate-700/80 p-4 sticky top-0 z-20 shadow-lg">
@@ -26,7 +57,7 @@
         <h1 class="font-bold text-lg text-blue-400">218 Группа</h1>
         <p class="text-xs text-slate-400" id="current-month-year">ВМК МГУ</p>
       </div>
-      <button onclick="goToToday()" class="text-xs bg-blue-600/30 hover:bg-blue-600/50 text-blue-300 border border-blue-500/40 px-3 py-1.5 rounded-xl font-medium transition">
+      <button onclick="goToToday()" class="text-xs bg-blue-600/30 hover:bg-blue-600/50 text-blue-300 border border-blue-500/40 px-3 py-1.5 rounded-xl font-medium transition active:scale-95">
         Сегодня
       </button>
     </div>
@@ -36,19 +67,19 @@
   <div class="bg-slate-800/50 border-b border-slate-800 sticky top-[65px] z-10 backdrop-blur-md">
     <div class="max-w-md mx-auto px-2 py-3">
       <div class="flex items-center justify-between mb-2 px-2 text-xs text-slate-400 font-medium">
-        <button onclick="changeWeek(-1)" class="p-1 hover:text-white">← Пред. неделя</button>
-        <span id="week-range-label" class="text-slate-300"></span>
-        <button onclick="changeWeek(1)" class="p-1 hover:text-white">След. неделя →</button>
+        <button onclick="changeWeek(-1)" class="p-1 hover:text-white transition">← Пред. неделя</button>
+        <span id="week-range-label" class="text-slate-300 font-semibold"></span>
+        <button onclick="changeWeek(1)" class="p-1 hover:text-white transition">След. неделя →</button>
       </div>
       <div class="grid grid-cols-7 gap-1 text-center" id="week-days-container">
-        <!-- Дни недели генерируются скриптом -->
+        <!-- Дни недели -->
       </div>
     </div>
   </div>
 
   <!-- Контент расписания -->
   <main class="max-w-md mx-auto p-4 flex-1 w-full" id="touch-area">
-    <div id="schedule-container" class="transition-opacity duration-200">
+    <div id="schedule-container" class="slide-active">
       <p class="text-center text-slate-500 text-sm py-12">Загрузка расписания...</p>
     </div>
   </main>
@@ -108,7 +139,7 @@
         const isToday = isSameDate(date, new Date());
 
         const dayBtn = document.createElement('button');
-        dayBtn.className = `flex flex-col items-center py-2 px-1 rounded-xl transition ${
+        dayBtn.className = `flex flex-col items-center py-2 px-1 rounded-xl transition-all duration-150 active:scale-95 ${
           isSelected 
             ? 'bg-blue-600 text-white font-bold shadow-lg shadow-blue-600/30' 
             : isToday 
@@ -123,13 +154,36 @@
         `;
 
         dayBtn.onclick = () => {
-          selectedDate = new Date(date);
-          renderCalendar();
-          renderDaySchedule(selectedDate);
+          const dir = date > selectedDate ? 'next' : 'prev';
+          switchDay(new Date(date), dir);
         };
 
         container.appendChild(dayBtn);
       }
+    }
+
+    function switchDay(newDate, direction) {
+      if (isSameDate(newDate, selectedDate)) return;
+
+      const container = document.getElementById('schedule-container');
+      const outClass = direction === 'next' ? 'slide-out-left' : 'slide-out-right';
+      const inClass = direction === 'next' ? 'slide-in-right' : 'slide-in-left';
+
+      container.className = outClass;
+
+      setTimeout(() => {
+        selectedDate = newDate;
+        renderCalendar();
+        renderDaySchedule(selectedDate);
+
+        container.className = `${inClass} no-transition`;
+        
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            container.className = 'slide-active';
+          });
+        });
+      }, 150);
     }
 
     function renderDaySchedule(date) {
@@ -193,19 +247,18 @@
 
     function changeWeek(direction) {
       currentMonday.setDate(currentMonday.getDate() + (direction * 7));
-      selectedDate = new Date(currentMonday);
-      renderCalendar();
-      renderDaySchedule(selectedDate);
+      const newDate = new Date(currentMonday);
+      switchDay(newDate, direction > 0 ? 'next' : 'prev');
     }
 
     function goToToday() {
-      selectedDate = new Date();
-      currentMonday = getMonday(selectedDate);
-      renderCalendar();
-      renderDaySchedule(selectedDate);
+      const today = new Date();
+      const dir = today > selectedDate ? 'next' : 'prev';
+      currentMonday = getMonday(today);
+      switchDay(today, dir);
     }
 
-    // Обработка Свайпов влево/вправо
+    // Обработка свайпов
     let touchStartX = 0;
     let touchEndX = 0;
     const touchArea = document.getElementById('touch-area');
@@ -219,16 +272,18 @@
     function handleSwipe() {
       const diff = touchStartX - touchEndX;
       if (Math.abs(diff) > 50) {
+        const targetDate = new Date(selectedDate);
         if (diff > 0) {
           // Свайп влево -> следующий день
-          selectedDate.setDate(selectedDate.getDate() + 1);
+          targetDate.setDate(targetDate.getDate() + 1);
+          currentMonday = getMonday(targetDate);
+          switchDay(targetDate, 'next');
         } else {
           // Свайп вправо -> предыдущий день
-          selectedDate.setDate(selectedDate.getDate() - 1);
+          targetDate.setDate(targetDate.getDate() - 1);
+          currentMonday = getMonday(targetDate);
+          switchDay(targetDate, 'prev');
         }
-        currentMonday = getMonday(selectedDate);
-        renderCalendar();
-        renderDaySchedule(selectedDate);
       }
     }
 
