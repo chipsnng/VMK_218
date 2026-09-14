@@ -56,10 +56,13 @@
       display: none;
     }
 
-    .snap-item {
-      scroll-snap-align: start;
-      flex: 0 0 100%;
-      width: 100%;
+    /* На смартфонах — 1 карточка во весь экран со снайпингом, на планшетах/ПК — сетка */
+    @media (max-width: 767px) {
+      .snap-item {
+        scroll-snap-align: start;
+        flex: 0 0 100%;
+        width: 100%;
+      }
     }
   </style>
 </head>
@@ -67,7 +70,7 @@
 
   <!-- Шапка -->
   <header class="bg-white/80 dark:bg-lavender-900/80 border-b border-lavender-200/60 dark:border-lavender-800/60 p-4 sticky top-0 z-20 backdrop-blur-xl transition-colors">
-    <div class="max-w-md mx-auto flex justify-between items-center">
+    <div class="max-w-7xl mx-auto flex justify-between items-center px-2 sm:px-4">
       <div>
         <div class="flex items-center gap-2">
           <h1 class="font-bold text-xl text-lavender-700 dark:text-lavender-300 tracking-tight">218 Группа</h1>
@@ -91,21 +94,21 @@
 
   <!-- Календарь на неделю -->
   <div class="bg-white/60 dark:bg-lavender-900/40 border-b border-lavender-200/50 dark:border-lavender-800/50 sticky top-[73px] z-10 backdrop-blur-md transition-colors">
-    <div class="max-w-md mx-auto px-3 py-2.5">
-      <div class="flex items-center justify-between mb-2 px-1 text-xs text-slate-500 dark:text-lavender-400 font-medium">
+    <div class="max-w-7xl mx-auto px-3 py-2.5">
+      <div class="flex items-center justify-between mb-2 px-1 text-xs text-slate-500 dark:text-lavender-400 font-medium max-w-md md:max-w-none mx-auto">
         <button onclick="changeWeek(-1)" class="p-1 active:scale-90 transition-transform">← Пред. неделя</button>
         <span id="week-range-label" class="text-slate-700 dark:text-lavender-200 font-semibold"></span>
         <button onclick="changeWeek(1)" class="p-1 active:scale-90 transition-transform">След. неделя →</button>
       </div>
-      <div class="grid grid-cols-7 gap-1 text-center" id="week-days-container">
+      <div class="grid grid-cols-7 gap-1 text-center max-w-3xl mx-auto" id="week-days-container">
         <!-- Дни недели -->
       </div>
     </div>
   </div>
 
-  <!-- Слайдер расписания -->
-  <main class="max-w-md mx-auto flex-1 w-full overflow-hidden">
-    <div id="slider-container" class="snap-slider h-full">
+  <!-- Главный блок: Слайдер для мобилок + Автоматическая сетка на ПК -->
+  <main class="max-w-7xl mx-auto flex-1 w-full overflow-hidden p-2 md:p-6">
+    <div id="slider-container" class="snap-slider md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-6 md:overflow-visible">
       <!-- Страницы дней -->
     </div>
   </main>
@@ -133,7 +136,7 @@
     }
 
     function getWeekParity(date) {
-      const academicStart = new Date(2026, 8, 1); // 1 сентября 2026
+      const academicStart = new Date(2026, 8, 1);
       const startMonday = getMonday(academicStart);
       const targetMonday = getMonday(date);
       
@@ -168,7 +171,7 @@
         setupScrollListener();
       } catch (err) {
         document.getElementById('slider-container').innerHTML = 
-          '<div class="w-full p-4 text-center text-red-500">Ошибка загрузки расписания</div>';
+          '<div class="w-full col-span-full p-4 text-center text-red-500">Ошибка загрузки расписания</div>';
       }
     }
 
@@ -195,13 +198,16 @@
         date.setDate(date.getDate() + i);
 
         const page = document.createElement('div');
-        page.className = 'snap-item p-4 box-border';
+        // На мобилках - snap-item, на ПК - адаптивная плашка
+        page.className = 'snap-item p-3 md:p-5 box-border bg-white/40 dark:bg-lavender-900/20 md:border md:border-lavender-200/50 md:dark:border-lavender-800/50 md:rounded-3xl md:shadow-sm';
         page.innerHTML = getDayScheduleHTML(date);
 
         slider.appendChild(page);
       }
 
-      scrollToSelectedDate(false);
+      if (window.innerWidth < 768) {
+        scrollToSelectedDate(false);
+      }
     }
 
     function renderCalendarHeader() {
@@ -245,7 +251,9 @@
         dayBtn.onclick = () => {
           selectedDate = new Date(date);
           renderCalendarHeader();
-          scrollToSelectedDate(true);
+          if (window.innerWidth < 768) {
+            scrollToSelectedDate(true);
+          }
         };
 
         container.appendChild(dayBtn);
@@ -295,7 +303,7 @@
 
       if (dayIndex === 0) {
         return `
-          <div class="text-center py-20 text-slate-400 dark:text-lavender-500">
+          <div class="text-center py-16 text-slate-400 dark:text-lavender-500">
             <div class="text-5xl mb-3">☕</div>
             <p class="font-semibold text-slate-700 dark:text-lavender-200 text-lg">Воскресенье</p>
             <p class="text-xs text-slate-400 dark:text-lavender-400 mt-1">Отдыхайте перед учебной неделей</p>
@@ -307,7 +315,7 @@
 
       if (!dayData || !dayData.lessons || dayData.lessons.length === 0) {
         return `
-          <div class="text-center py-20 text-slate-400 dark:text-lavender-500">
+          <div class="text-center py-16 text-slate-400 dark:text-lavender-500">
             <p class="font-medium">Занятий нет</p>
           </div>`;
       }
@@ -320,7 +328,6 @@
         let cardBodyHTML = '';
 
         if (item.parity_split) {
-          // Пара делится пополам по чётности
           const oddLesson = item.parity_split.find(p => p.parity === 'odd') || item.parity_split[0];
           const evenLesson = item.parity_split.find(p => p.parity === 'even') || item.parity_split[1];
 
@@ -331,7 +338,6 @@
             </div>
           `;
         } else {
-          // Обычная пара (для всех недель)
           cardBodyHTML = `
             <div class="flex-1 bg-white dark:bg-lavender-900/90 border border-lavender-200/70 dark:border-lavender-800/80 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
               ${renderSingleLessonCard(item, true)}
@@ -379,7 +385,7 @@
       let timeout = null;
 
       slider.addEventListener('scroll', () => {
-        if (isProgrammaticScroll) return;
+        if (isProgrammaticScroll || window.innerWidth >= 768) return;
 
         clearTimeout(timeout);
         timeout = setTimeout(() => {
