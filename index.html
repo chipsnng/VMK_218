@@ -11,7 +11,6 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="218 ВМК">
   
-  <!-- Иконка приложения на Home Screen (SVG Data URI) -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='128' fill='%237c3aed'/><circle cx='256' cy='256' r='180' fill='%23a78bfa'/><text x='50%' y='58%' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-weight='900' font-size='200' fill='%23ffffff'>218</text></svg>">
   <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='128' fill='%237c3aed'/><circle cx='256' cy='256' r='180' fill='%23a78bfa'/><text x='50%' y='58%' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-weight='900' font-size='200' fill='%23ffffff'>218</text></svg>">
 
@@ -67,6 +66,10 @@
       scroll-snap-align: start;
       flex: 0 0 100%;
       width: 100%;
+    }
+
+    .day-btn-transition {
+      transition: background-color 0.25s ease, color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
     }
   </style>
 </head>
@@ -134,7 +137,8 @@
     ];
 
     const dayNames = ["Воскресенье", "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"];
-    const monthNames = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"];
+    const monthNamesHeader = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"];
+    const monthNamesGenitive = ["января", "февраля", "марта", "апреля", "мая", "июня", "июля", "августа", "сентября", "октября", "ноября", "декабря"];
 
     function getMonday(d) {
       const date = new Date(d);
@@ -232,10 +236,10 @@
       document.getElementById('week-parity-badge').innerText = `${parity.label}`;
 
       document.getElementById('week-range-label').innerText = 
-        `${currentMonday.getDate()} ${monthNames[currentMonday.getMonth()].slice(0, 3)} — ${sunday.getDate()} ${monthNames[sunday.getMonth()].slice(0, 3)}`;
+        `${currentMonday.getDate()} ${monthNamesGenitive[currentMonday.getMonth()].slice(0, 3)} — ${sunday.getDate()} ${monthNamesGenitive[sunday.getMonth()].slice(0, 3)}`;
 
       document.getElementById('current-month-year').innerText = 
-        `${monthNames[selectedDate.getMonth()]} ${selectedDate.getFullYear()}`;
+        `${monthNamesHeader[selectedDate.getMonth()]} ${selectedDate.getFullYear()}`;
 
       for (let i = 0; i < 7; i++) {
         const date = new Date(currentMonday);
@@ -245,9 +249,10 @@
         const isToday = isSameDate(date, new Date());
 
         const dayBtn = document.createElement('button');
-        dayBtn.className = `w-11 h-14 flex flex-col items-center justify-center rounded-full transition-all duration-200 active:scale-90 mx-auto ${
+        dayBtn.id = `day-btn-${i}`;
+        dayBtn.className = `w-11 h-14 flex flex-col items-center justify-center rounded-full day-btn-transition active:scale-90 mx-auto ${
           isSelected 
-            ? 'bg-brand-lightPrimary dark:bg-brand-darkPrimary text-white dark:text-brand-darkBg font-bold shadow-lg shadow-purple-500/30' 
+            ? 'bg-brand-lightPrimary dark:bg-brand-darkPrimary text-white dark:text-brand-darkBg font-bold shadow-lg shadow-purple-500/30 scale-105' 
             : isToday 
               ? 'bg-purple-200/80 dark:bg-brand-darkMuted text-brand-lightPrimary dark:text-brand-darkPrimary font-bold border-2 border-brand-lightPrimary dark:border-brand-darkPrimary' 
               : 'text-slate-500 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-brand-darkMuted'
@@ -261,7 +266,7 @@
 
         dayBtn.onclick = () => {
           selectedDate = new Date(date);
-          renderCalendarHeader();
+          updateHeaderActiveDay();
           scrollToSelectedDate(true);
         };
 
@@ -269,7 +274,31 @@
       }
     }
 
-    // Рендер карточки занятия для блока с делением пополам (слева/справа)
+    function updateHeaderActiveDay() {
+      const parity = getWeekParity(selectedDate);
+      document.getElementById('week-parity-badge').innerText = `${parity.label}`;
+      document.getElementById('current-month-year').innerText = 
+        `${monthNamesHeader[selectedDate.getMonth()]} ${selectedDate.getFullYear()}`;
+
+      for (let i = 0; i < 7; i++) {
+        const date = new Date(currentMonday);
+        date.setDate(date.getDate() + i);
+        const btn = document.getElementById(`day-btn-${i}`);
+        if (!btn) continue;
+
+        const isSelected = isSameDate(date, selectedDate);
+        const isToday = isSameDate(date, new Date());
+
+        btn.className = `w-11 h-14 flex flex-col items-center justify-center rounded-full day-btn-transition active:scale-90 mx-auto ${
+          isSelected 
+            ? 'bg-brand-lightPrimary dark:bg-brand-darkPrimary text-white dark:text-brand-darkBg font-bold shadow-lg shadow-purple-500/30 scale-105' 
+            : isToday 
+              ? 'bg-purple-200/80 dark:bg-brand-darkMuted text-brand-lightPrimary dark:text-brand-darkPrimary font-bold border-2 border-brand-lightPrimary dark:border-brand-darkPrimary' 
+              : 'text-slate-500 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-brand-darkMuted'
+        }`;
+      }
+    }
+
     function renderHalfLessonCard(lesson, isActive = true, sideLabel = '') {
       const isLecture = lesson.type === 'Лекция';
       const badgeColor = isActive 
@@ -299,7 +328,6 @@
       `;
     }
 
-    // Рендер обычной цельной карточки
     function renderFullLessonCard(lesson) {
       const isLecture = lesson.type === 'Лекция';
       const badgeColor = isLecture 
@@ -324,7 +352,6 @@
       `;
     }
 
-    // Рендер карточки "Окно"
     function renderWindowCard() {
       return `
         <div class="flex-1 bg-purple-50/40 dark:bg-brand-darkMuted/20 border-2 border-dashed border-purple-200/60 dark:border-purple-900/30 rounded-3xl p-3.5 flex items-center justify-center">
@@ -357,11 +384,9 @@
           </div>`;
       }
 
-      // Нормализация пар с автоподстановкой окон
       let rawLessons = dayData.lessons;
       let fullSchedule = [];
 
-      // Определяем максимальное время последней пары в этот день
       let maxTimeIndex = -1;
       rawLessons.forEach(l => {
         let idx = timeSlots.indexOf(l.time);
@@ -376,6 +401,10 @@
           if (foundLesson) {
             fullSchedule.push(foundLesson);
           } else {
+            // Игнорируем перерыв между 3-й (12:15-13:50) и 4-й парой (12:50-14:25)
+            if (slotTime === "12:50 - 14:25" && rawLessons.some(l => l.time === "12:15 - 13:50")) {
+              continue;
+            }
             fullSchedule.push({ time: slotTime, isWindow: true });
           }
         }
@@ -393,7 +422,6 @@
         if (item.isWindow) {
           cardBodyHTML = renderWindowCard();
         } else if (item.parity_split) {
-          // Чередование недели: Деление карточки ПОПОЛАМ (Слева - нечетная, Справа - четная)
           const oddLesson = item.parity_split.find(p => p.parity === 'odd') || item.parity_split[0];
           const evenLesson = item.parity_split.find(p => p.parity === 'even') || item.parity_split[1];
 
@@ -422,7 +450,7 @@
       return `
         <div class="mb-4 px-2 flex justify-between items-baseline">
           <h2 class="font-black text-slate-800 dark:text-purple-100 text-2xl tracking-tight">${dayName}</h2>
-          <span class="text-xs font-bold text-slate-400 dark:text-purple-300/60">${date.getDate()} ${monthNames[date.getMonth()]}</span>
+          <span class="text-xs font-bold text-slate-400 dark:text-purple-300/60">${date.getDate()} ${monthNamesGenitive[date.getMonth()]}</span>
         </div>
         ${lessonsHTML}
       `;
@@ -442,31 +470,51 @@
       setTimeout(() => { isProgrammaticScroll = false; }, 350);
     }
 
-    // Поддержка Drag & Mouse Swipe
     function setupScrollAndDrag() {
       const slider = document.getElementById('slider-container');
-      let timeout = null;
       let isMouseDown = false;
       let startX, scrollLeft;
 
-      // Обычный скролл
+      // Динамическая синхронизация верхних кружков при скролле
       slider.addEventListener('scroll', () => {
         if (isProgrammaticScroll) return;
 
-        clearTimeout(timeout);
-        timeout = setTimeout(() => {
-          const index = Math.round(slider.scrollLeft / slider.clientWidth);
+        const width = slider.clientWidth;
+        if (!width) return;
+
+        const exactIndex = slider.scrollLeft / width;
+        const roundedIndex = Math.round(exactIndex);
+
+        // Бесконечный переход между неделями
+        if (exactIndex < -0.15) {
+          isProgrammaticScroll = true;
+          changeWeek(-1);
+          selectedDate = new Date(currentMonday);
+          selectedDate.setDate(selectedDate.getDate() + 6);
+          updateHeaderActiveDay();
+          scrollToSelectedDate(false);
+          return;
+        } else if (exactIndex > 6.15) {
+          isProgrammaticScroll = true;
+          changeWeek(1);
+          selectedDate = new Date(currentMonday);
+          updateHeaderActiveDay();
+          scrollToSelectedDate(false);
+          return;
+        }
+
+        if (roundedIndex >= 0 && roundedIndex <= 6) {
           const newDate = new Date(currentMonday);
-          newDate.setDate(newDate.getDate() + index);
+          newDate.setDate(newDate.getDate() + roundedIndex);
 
           if (!isSameDate(newDate, selectedDate)) {
             selectedDate = newDate;
-            renderCalendarHeader();
+            updateHeaderActiveDay();
           }
-        }, 50);
+        }
       });
 
-      // Перетаскивание мышью (Drag-to-scroll)
+      // Перетаскивание мышью
       slider.addEventListener('mousedown', (e) => {
         isMouseDown = true;
         startX = e.pageX - slider.offsetLeft;
@@ -485,7 +533,6 @@
         isMouseDown = false;
         slider.style.scrollBehavior = 'smooth';
         
-        // Магнитное выравнивание на ближайший день
         const index = Math.round(slider.scrollLeft / slider.clientWidth);
         slider.scrollTo({ left: index * slider.clientWidth, behavior: 'smooth' });
       });
