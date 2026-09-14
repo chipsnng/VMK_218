@@ -3,18 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>218 ВМК МГУ</title>
+  <title>218 ВМК МГУ — Расписание</title>
   
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#f5f0ff">
+  <meta name="theme-color" content="#f8f5ff">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="218 ВМК">
   
-  <!-- Иконка приложения (PWA) при добавлении на домашний экран -->
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='128' fill='%237c3aed'/><text x='50%' y='55%' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-weight='900' font-size='180' fill='%23ffffff'>218</text></svg>">
-  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='128' fill='%237c3aed'/><text x='50%' y='55%' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-weight='900' font-size='180' fill='%23ffffff'>218</text></svg>">
-
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -22,21 +18,18 @@
       theme: {
         extend: {
           colors: {
-            brand: {
-              50: '#f5f0ff',
-              100: '#ede4ff',
-              200: '#ddccff',
-              300: '#c4a3ff',
-              400: '#a870ff',
-              500: '#8b3dff',
-              600: '#7c3aed', // Захватывающий фиолетовый в светлой теме
+            lavender: {
+              50: '#f8f5ff',
+              100: '#f0ebff',
+              200: '#e1d4fe',
+              300: '#cbb3fc',
+              400: '#af88fa',
+              500: '#935bf6',
+              600: '#7c3aed',
               700: '#6d28d9',
-              // Мягкие, менее контрастные тона для темной темы:
-              darkBg: '#13111c',
-              darkCard: '#1d1a29',
-              darkSubCard: '#272338',
-              darkText: '#e2d9f3',
-              darkAccent: '#b490ff'
+              800: '#1e1b2e',
+              900: '#13111f',
+              950: '#0b0a12',
             }
           }
         }
@@ -57,12 +50,6 @@
       scroll-snap-type: x mandatory;
       scroll-behavior: smooth;
       -webkit-overflow-scrolling: touch;
-      width: 100%;
-      cursor: grab;
-    }
-
-    .snap-slider:active {
-      cursor: grabbing;
     }
 
     .snap-slider::-webkit-scrollbar {
@@ -71,77 +58,57 @@
 
     .snap-item {
       scroll-snap-align: start;
-      scroll-snap-stop: always;
       flex: 0 0 100%;
       width: 100%;
-      min-width: 100%;
     }
   </style>
 </head>
-<body class="bg-brand-50 dark:bg-brand-darkBg text-slate-800 dark:text-brand-darkText min-h-screen flex flex-col pb-24 transition-colors duration-300">
+<body class="bg-lavender-50 dark:bg-lavender-950 text-slate-800 dark:text-lavender-100 min-h-screen flex flex-col transition-colors duration-300 overflow-x-hidden">
 
   <!-- Шапка -->
-  <header class="p-4 max-w-2xl w-full mx-auto flex justify-between items-center">
-    <div class="flex items-center gap-3">
-      <div class="w-10 h-10 rounded-full bg-brand-600 dark:bg-brand-darkAccent text-white dark:text-brand-darkBg flex items-center justify-center font-black text-sm shadow-md shadow-brand-600/30">
-        218
-      </div>
+  <header class="bg-white/80 dark:bg-lavender-900/80 border-b border-lavender-200/60 dark:border-lavender-800/60 p-4 sticky top-0 z-20 backdrop-blur-xl transition-colors">
+    <div class="max-w-md mx-auto flex justify-between items-center">
       <div>
-        <h1 class="font-extrabold text-lg leading-tight tracking-tight text-brand-700 dark:text-brand-darkAccent">ВМК МГУ</h1>
-        <div class="flex items-center gap-2 mt-0.5">
-          <span id="week-parity-badge" class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-brand-200 dark:bg-brand-darkSubCard text-brand-700 dark:text-brand-darkAccent">
+        <div class="flex items-center gap-2">
+          <h1 class="font-bold text-xl text-lavender-700 dark:text-lavender-300 tracking-tight">218 Группа</h1>
+          <span id="week-parity-badge" class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-lavender-100 dark:bg-lavender-800 text-lavender-700 dark:text-lavender-300 border border-lavender-200 dark:border-lavender-700">
             --
           </span>
-          <span class="text-xs text-slate-400 dark:text-slate-400" id="current-month-year">...</span>
         </div>
+        <p class="text-xs text-slate-500 dark:text-lavender-400 mt-0.5" id="current-month-year">ВМК МГУ</p>
       </div>
-    </div>
-
-    <div class="flex items-center gap-2">
-      <button onclick="toggleTheme()" class="w-10 h-10 rounded-full bg-white dark:bg-brand-darkCard text-slate-600 dark:text-brand-darkAccent shadow-sm flex items-center justify-center active:scale-95 transition-all">
-        <span id="theme-icon">🌙</span>
-      </button>
-      <button onclick="goToToday()" class="text-xs bg-brand-600 hover:bg-brand-700 dark:bg-brand-darkAccent dark:text-brand-darkBg text-white font-bold px-4 py-2.5 rounded-full shadow-md shadow-brand-600/20 active:scale-95 transition-all">
-        Сегодня
-      </button>
+      
+      <div class="flex items-center gap-2">
+        <button onclick="toggleTheme()" class="p-2 rounded-full bg-lavender-100 dark:bg-lavender-800 text-lavender-700 dark:text-lavender-200 active:scale-90 transition-transform">
+          <span id="theme-icon">🌙</span>
+        </button>
+        <button onclick="goToToday()" class="text-xs bg-lavender-600 hover:bg-lavender-700 text-white font-medium px-3.5 py-2 rounded-full shadow-sm active:scale-90 transition-transform">
+          Сегодня
+        </button>
+      </div>
     </div>
   </header>
 
-  <!-- Календарь недели -->
-  <div class="max-w-2xl w-full mx-auto px-4 my-2">
-    <div class="bg-white/90 dark:bg-brand-darkCard/90 backdrop-blur-xl border border-brand-100 dark:border-brand-darkSubCard rounded-full p-2 shadow-sm">
-      <div class="flex items-center justify-between px-3 mb-1 text-[11px] text-slate-400 dark:text-slate-400 font-medium">
-        <button onclick="changeWeek(-1)" class="hover:text-brand-600 dark:hover:text-brand-darkAccent transition-colors">← Пред. неделя</button>
-        <span id="week-range-label" class="text-brand-700 dark:text-brand-darkAccent font-bold"></span>
-        <button onclick="changeWeek(1)" class="hover:text-brand-600 dark:hover:text-brand-darkAccent transition-colors">След. неделя →</button>
+  <!-- Календарь на неделю -->
+  <div class="bg-white/60 dark:bg-lavender-900/40 border-b border-lavender-200/50 dark:border-lavender-800/50 sticky top-[73px] z-10 backdrop-blur-md transition-colors">
+    <div class="max-w-md mx-auto px-3 py-2.5">
+      <div class="flex items-center justify-between mb-2 px-1 text-xs text-slate-500 dark:text-lavender-400 font-medium">
+        <button onclick="changeWeek(-1)" class="p-1 active:scale-90 transition-transform">← Пред. неделя</button>
+        <span id="week-range-label" class="text-slate-700 dark:text-lavender-200 font-semibold"></span>
+        <button onclick="changeWeek(1)" class="p-1 active:scale-90 transition-transform">След. неделя →</button>
       </div>
-      
-      <div class="grid grid-cols-7 gap-1" id="week-days-container">
-        <!-- Кнопки дней -->
+      <div class="grid grid-cols-7 gap-1 text-center" id="week-days-container">
+        <!-- Дни недели -->
       </div>
     </div>
   </div>
 
-  <!-- Главный слайдер -->
-  <main class="max-w-2xl w-full mx-auto flex-1 overflow-hidden px-4 mt-2">
-    <div id="slider-container" class="snap-slider">
+  <!-- Слайдер расписания -->
+  <main class="max-w-md mx-auto flex-1 w-full overflow-hidden">
+    <div id="slider-container" class="snap-slider h-full">
       <!-- Страницы дней -->
     </div>
   </main>
-
-  <!-- Нижняя панель -->
-  <div class="fixed bottom-4 left-1/2 -translate-x-1/2 z-30">
-    <div class="bg-white/90 dark:bg-brand-darkCard/90 backdrop-blur-2xl border border-brand-100 dark:border-brand-darkSubCard rounded-full p-1.5 shadow-xl flex items-center gap-1">
-      <button class="flex items-center gap-2 bg-brand-100 dark:bg-brand-darkSubCard text-brand-700 dark:text-brand-darkAccent px-5 py-2.5 rounded-full font-bold text-xs transition-all">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-        <span>Расписание</span>
-      </button>
-      <button onclick="alert('Раздел ДЗ в разработке')" class="flex items-center gap-1.5 text-slate-400 dark:text-slate-400 hover:text-brand-600 dark:hover:text-brand-darkAccent px-4 py-2.5 rounded-full text-xs font-medium transition-all">
-        <span>📝</span>
-        <span>ДЗ</span>
-      </button>
-    </div>
-  </div>
 
   <script>
     let scheduleData = null;
@@ -149,18 +116,8 @@
     let selectedDate = new Date();
     let isProgrammaticScroll = false;
 
-    // Эталонное время для пар ВМК
-    const standardTimes = [
-      "08:45 - 10:20",
-      "10:30 - 12:05",
-      "12:50 - 14:25",
-      "14:35 - 16:10",
-      "16:20 - 17:55",
-      "18:00 - 19:35"
-    ];
-
     const dayNames = ["Воскресенье", "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"];
-    const monthNames = ["Января", "Февраля", "Марта", "Апреля", "Мая", "Июня", "Июля", "Августа", "Сентября", "Октября", "Ноября", "Декабря"];
+    const monthNames = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"];
 
     function getMonday(d) {
       const date = new Date(d);
@@ -176,7 +133,8 @@
     }
 
     function getWeekParity(date) {
-      const academicStart = new Date(2026, 8, 1);
+      // Точка отсчета: 1 сентября 2026 года (вторник, 1-я учебная нечётная неделя)
+      const academicStart = new Date(2026, 8, 1); 
       const startMonday = getMonday(academicStart);
       const targetMonday = getMonday(date);
       
@@ -189,7 +147,7 @@
         weekNum: weekNum,
         isOdd: isOdd,
         key: isOdd ? 'odd' : 'even',
-        label: isOdd ? 'нечётная' : 'чётная'
+        label: isOdd ? 'нечётная неделя' : 'чётная неделя'
       };
     }
 
@@ -208,10 +166,10 @@
         const response = await fetch('schedule.json');
         scheduleData = await response.json();
         renderWeekPages();
-        setupScrollAndDrag();
+        setupScrollListener();
       } catch (err) {
         document.getElementById('slider-container').innerHTML = 
-          '<div class="w-full text-center p-8 text-red-500 font-medium">Ошибка загрузки schedule.json</div>';
+          '<div class="w-full p-4 text-center text-red-500 font-medium mt-10">Ошибка загрузки файла schedule.json</div>';
       }
     }
 
@@ -238,7 +196,7 @@
         date.setDate(date.getDate() + i);
 
         const page = document.createElement('div');
-        page.className = 'snap-item w-full flex-shrink-0';
+        page.className = 'snap-item p-4 box-border';
         page.innerHTML = getDayScheduleHTML(date);
 
         slider.appendChild(page);
@@ -255,15 +213,13 @@
       sunday.setDate(sunday.getDate() + 6);
 
       const parity = getWeekParity(selectedDate);
-      document.getElementById('week-parity-badge').innerText = `${parity.label} неделя`;
+      document.getElementById('week-parity-badge').innerText = `${parity.label}`;
 
       document.getElementById('week-range-label').innerText = 
         `${currentMonday.getDate()} ${monthNames[currentMonday.getMonth()].slice(0, 3)} — ${sunday.getDate()} ${monthNames[sunday.getMonth()].slice(0, 3)}`;
 
       document.getElementById('current-month-year').innerText = 
-        `${selectedDate.getFullYear()} г.`;
-
-      const shortDays = ["вс", "пн", "вт", "ср", "чт", "пт", "сб"];
+        `${monthNames[selectedDate.getMonth()]} ${selectedDate.getFullYear()}`;
 
       for (let i = 0; i < 7; i++) {
         const date = new Date(currentMonday);
@@ -273,17 +229,18 @@
         const isToday = isSameDate(date, new Date());
 
         const dayBtn = document.createElement('button');
-        dayBtn.className = `flex flex-col items-center justify-center py-2 rounded-full transition-all duration-200 active:scale-90 ${
+        dayBtn.className = `flex flex-col items-center py-2 px-1 rounded-2xl transition-all duration-200 active:scale-90 ${
           isSelected 
-            ? 'bg-brand-600 dark:bg-brand-darkAccent text-white dark:text-brand-darkBg font-black shadow-md shadow-brand-600/30' 
+            ? 'bg-lavender-600 text-white font-bold shadow-lg shadow-lavender-600/30' 
             : isToday 
-              ? 'bg-brand-200 dark:bg-brand-darkSubCard text-brand-700 dark:text-brand-darkAccent font-bold border border-brand-300 dark:border-slate-600' 
-              : 'text-slate-500 dark:text-slate-400 hover:bg-brand-100 dark:hover:bg-brand-darkSubCard/50'
+              ? 'bg-lavender-200/70 dark:bg-lavender-800/80 text-lavender-700 dark:text-lavender-300 font-semibold border border-lavender-300 dark:border-lavender-700' 
+              : 'text-slate-500 dark:text-lavender-400 hover:bg-lavender-100/50 dark:hover:bg-lavender-800/50'
         }`;
 
+        const shortDays = ["Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"];
         dayBtn.innerHTML = `
-          <span class="text-[10px] uppercase font-semibold opacity-60">${shortDays[date.getDay()]}</span>
-          <span class="text-xs sm:text-sm font-bold mt-0.5">${date.getDate()}</span>
+          <span class="text-[10px] uppercase mb-0.5 opacity-70">${shortDays[date.getDay()]}</span>
+          <span class="text-sm">${date.getDate()}</span>
         `;
 
         dayBtn.onclick = () => {
@@ -298,52 +255,37 @@
 
     function renderSingleLessonCard(lesson, isActive = true) {
       const isLecture = lesson.type === 'Лекция';
-      
       const badgeColor = isActive 
         ? (isLecture 
-            ? 'bg-purple-100 dark:bg-purple-950/60 text-purple-600 dark:text-purple-300' 
-            : 'bg-brand-100 dark:bg-brand-darkSubCard text-brand-600 dark:text-brand-darkAccent')
-        : 'bg-slate-100 dark:bg-slate-800 text-slate-400';
+            ? 'bg-purple-100 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800' 
+            : 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800')
+        : 'bg-slate-100 dark:bg-slate-800/80 text-slate-400 border-slate-200 dark:border-slate-700';
 
       const parityTag = lesson.parity 
         ? (lesson.parity === 'odd' ? 'Нечётная' : 'Чётная') 
         : null;
 
       return `
-        <div class="p-4 sm:p-5 flex-1 flex flex-col justify-between ${isActive ? '' : 'opacity-40'}">
-          <div>
-            <div class="flex items-center gap-2 mb-2">
-              <span class="text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full ${badgeColor}">
-                ${lesson.type}
-              </span>
+        <div class="p-3.5 transition-all ${isActive ? '' : 'opacity-40 grayscale-[30%]'}">
+          <div class="flex justify-between items-center mb-1 gap-1">
+            <div class="flex items-center gap-1.5">
               ${parityTag ? `
-                <span class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                <span class="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${isActive ? 'bg-lavender-600 text-white' : 'bg-slate-300 dark:bg-slate-700 text-slate-600 dark:text-slate-300'}">
                   ${parityTag}
                 </span>
               ` : ''}
+              <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full border ${badgeColor}">
+                ${lesson.type}
+              </span>
             </div>
-
-            <h3 class="font-bold text-slate-900 dark:text-brand-darkText text-base sm:text-lg leading-snug mb-2">
-              ${lesson.subject}
-            </h3>
-          </div>
-
-          <div class="flex flex-wrap items-center gap-y-1 gap-x-4 text-xs text-slate-400 dark:text-slate-400 pt-2 border-t border-slate-100 dark:border-slate-800">
-            <span class="flex items-center gap-1 font-medium text-slate-500 dark:text-slate-300">
-              👤 ${lesson.teacher}
-            </span>
-            <span class="flex items-center gap-1 font-semibold text-slate-600 dark:text-slate-200">
-              🏛️ ауд. ${lesson.room}
+            <span class="text-xs font-semibold ${isActive ? 'text-lavender-700 dark:text-lavender-300 bg-lavender-50 dark:bg-lavender-800/60' : 'text-slate-400 bg-slate-100 dark:bg-slate-800'} px-2 py-0.5 rounded-md">
+              📍 ${lesson.room}
             </span>
           </div>
-        </div>
-      `;
-    }
-
-    function renderWindowCard() {
-      return `
-        <div class="flex-1 bg-white/40 dark:bg-brand-darkCard/30 rounded-3xl border border-dashed border-slate-200 dark:border-slate-800 p-4 flex items-center justify-center">
-          <span class="text-xs font-semibold text-slate-400 dark:text-slate-500">Окно</span>
+          <div class="font-semibold text-slate-800 dark:text-lavender-50 text-sm my-1 leading-snug">${lesson.subject}</div>
+          <div class="text-xs text-slate-500 dark:text-lavender-400 pt-1 truncate">
+            👤 ${lesson.teacher}
+          </div>
         </div>
       `;
     }
@@ -351,14 +293,13 @@
     function getDayScheduleHTML(date) {
       const dayIndex = date.getDay(); 
       const dayName = dayNames[dayIndex];
-      const isToday = isSameDate(date, new Date());
 
       if (dayIndex === 0) {
         return `
-          <div class="bg-white/70 dark:bg-brand-darkCard/60 border border-brand-100 dark:border-brand-darkSubCard rounded-3xl p-12 text-center shadow-sm">
-            <div class="w-16 h-16 bg-brand-100 dark:bg-brand-darkSubCard rounded-full flex items-center justify-center mx-auto mb-3 text-2xl">☕</div>
-            <h2 class="font-bold text-slate-800 dark:text-brand-darkText text-xl">Воскресенье</h2>
-            <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">Занятий нет, время отдыхать</p>
+          <div class="text-center py-20 text-slate-400 dark:text-lavender-500">
+            <div class="text-5xl mb-3">☕</div>
+            <p class="font-semibold text-slate-700 dark:text-lavender-200 text-lg">Воскресенье</p>
+            <p class="text-xs text-slate-400 dark:text-lavender-400 mt-1">Отдыхайте перед учебной неделей</p>
           </div>`;
       }
 
@@ -367,92 +308,54 @@
 
       if (!dayData || !dayData.lessons || dayData.lessons.length === 0) {
         return `
-          <div class="bg-white/70 dark:bg-brand-darkCard/60 border border-brand-100 dark:border-brand-darkSubCard rounded-3xl p-12 text-center shadow-sm">
-            <p class="font-bold text-slate-400 dark:text-slate-500">Занятий нет</p>
+          <div class="text-center py-20 text-slate-400 dark:text-lavender-500">
+            <p class="font-medium">Занятий нет</p>
           </div>`;
       }
 
-      // 1. Определение позиции пары (1..6)
-      const lessonSlots = {};
-      let maxSlot = 0;
-
-      dayData.lessons.forEach(item => {
-        let slotIndex = item.number ? parseInt(item.number) : 0;
-        if (!slotIndex) {
-          const startTime = item.time.split(' - ')[0];
-          slotIndex = standardTimes.findIndex(t => t.startsWith(startTime)) + 1;
-        }
-        if (slotIndex > 0) {
-          lessonSlots[slotIndex] = item;
-          if (slotIndex > maxSlot) maxSlot = slotIndex;
-        }
-      });
-
-      // 2. Добавление «Окон» сверху и внутри расписания
-      let fullItemsHTML = '';
-      let activeLessonsCount = 0;
-
-      for (let slot = 1; slot <= maxSlot; slot++) {
-        const timeStr = standardTimes[slot - 1] || "Пара " + slot;
-        const times = timeStr.split(' - ');
-        const startTime = times[0];
+      let lessonsHTML = dayData.lessons.map(item => {
+        const times = item.time.split(' - ');
+        const startTime = times[0] || item.time;
         const endTime = times[1] || '';
 
-        const item = lessonSlots[slot];
+        let cardBodyHTML = '';
 
-        let rightCardHTML = '';
+        if (item.parity_split) {
+          const oddLesson = item.parity_split.find(p => p.parity === 'odd') || item.parity_split[0];
+          const evenLesson = item.parity_split.find(p => p.parity === 'even') || item.parity_split[1];
 
-        if (!item) {
-          rightCardHTML = renderWindowCard();
+          cardBodyHTML = `
+            <div class="flex flex-col border border-lavender-200/70 dark:border-lavender-800/80 rounded-2xl bg-white dark:bg-lavender-900/90 shadow-sm overflow-hidden flex-1 divide-y divide-lavender-100 dark:divide-lavender-800/60">
+              ${renderSingleLessonCard(oddLesson, parity.key === 'odd')}
+              ${renderSingleLessonCard(evenLesson, parity.key === 'even')}
+            </div>
+          `;
         } else {
-          activeLessonsCount++;
-          if (item.parity_split) {
-            const oddLesson = item.parity_split.find(p => p.parity === 'odd') || item.parity_split[0];
-            const evenLesson = item.parity_split.find(p => p.parity === 'even') || item.parity_split[1];
-
-            rightCardHTML = `
-              <div class="flex-1 flex flex-col bg-white dark:bg-brand-darkCard rounded-3xl border border-brand-100 dark:border-brand-darkSubCard shadow-sm overflow-hidden divide-y divide-slate-100 dark:divide-slate-800">
-                ${renderSingleLessonCard(oddLesson, parity.key === 'odd')}
-                ${renderSingleLessonCard(evenLesson, parity.key === 'even')}
-              </div>
-            `;
-          } else {
-            rightCardHTML = `
-              <div class="flex-1 bg-white dark:bg-brand-darkCard rounded-3xl border border-brand-100 dark:border-brand-darkSubCard shadow-sm overflow-hidden">
-                ${renderSingleLessonCard(item, true)}
-              </div>
-            `;
-          }
+          cardBodyHTML = `
+            <div class="flex-1 bg-white dark:bg-lavender-900/90 border border-lavender-200/70 dark:border-lavender-800/80 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
+              ${renderSingleLessonCard(item, true)}
+            </div>
+          `;
         }
 
-        fullItemsHTML += `
-          <div class="flex gap-3 sm:gap-4 items-stretch mb-3">
-            <div class="w-24 sm:w-28 flex-shrink-0 bg-white/80 dark:bg-brand-darkCard/80 border border-brand-100 dark:border-brand-darkSubCard rounded-3xl p-3 flex flex-col justify-center items-center text-center shadow-sm">
-              <span class="text-xs sm:text-sm font-black text-slate-800 dark:text-brand-darkText">${startTime}</span>
-              <span class="text-[11px] font-semibold text-slate-400 mt-0.5">${endTime}</span>
-              <span class="text-[9px] font-bold text-slate-400 dark:text-slate-500 mt-2 bg-slate-100 dark:bg-brand-darkSubCard px-2 py-0.5 rounded-full">
-                ${slot} пара
-              </span>
+        return `
+          <div class="flex gap-3 mb-3.5 items-stretch">
+            <div class="w-16 flex-shrink-0 flex flex-col justify-center items-center text-center bg-white/50 dark:bg-lavender-900/30 rounded-2xl border border-lavender-100 dark:border-lavender-800/40 p-2">
+              <span class="text-xs font-bold text-slate-800 dark:text-lavender-100">${startTime}</span>
+              ${endTime ? `<span class="text-[10px] text-slate-400 dark:text-lavender-400 mt-0.5">${endTime}</span>` : ''}
             </div>
-            ${rightCardHTML}
+
+            ${cardBodyHTML}
           </div>
         `;
-      }
+      }).join('');
 
       return `
-        <div class="flex items-center justify-between mb-3 px-2">
-          <div class="flex items-center gap-2">
-            <h2 class="font-extrabold text-slate-900 dark:text-brand-darkText text-2xl tracking-tight">${dayName}</h2>
-            <span class="text-sm font-medium text-slate-400">· ${date.getDate()} ${monthNames[date.getMonth()]}</span>
-          </div>
-          <div class="flex items-center gap-2">
-            ${isToday ? '<span class="text-[10px] font-black uppercase px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-950/80 dark:text-emerald-400">Сегодня</span>' : ''}
-            <span class="text-xs text-slate-400 font-medium">${activeLessonsCount} пара(ы)</span>
-          </div>
+        <div class="mb-4 px-1 flex justify-between items-baseline">
+          <h2 class="font-bold text-slate-800 dark:text-lavender-100 text-xl tracking-tight">${dayName}</h2>
+          <span class="text-xs text-slate-400 dark:text-lavender-400 font-medium">${date.getDate()} ${monthNames[date.getMonth()]}</span>
         </div>
-        <div>
-          ${fullItemsHTML}
-        </div>
+        ${lessonsHTML}
       `;
     }
 
@@ -470,59 +373,12 @@
       setTimeout(() => { isProgrammaticScroll = false; }, 350);
     }
 
-    // Обработка перетаскивания мышью (Drag-to-Scroll) и обычного скролла
-    function setupScrollAndDrag() {
+    function setupScrollListener() {
       const slider = document.getElementById('slider-container');
       let timeout = null;
 
-      let isDown = false;
-      let startX;
-      let scrollLeft;
-
-      slider.addEventListener('mousedown', (e) => {
-        isDown = true;
-        startX = e.pageX - slider.offsetLeft;
-        scrollLeft = slider.scrollLeft;
-        slider.style.scrollBehavior = 'auto'; // Отключаем плавность во время перетаскивания мышью
-      });
-
-      slider.addEventListener('mouseleave', () => {
-        if (!isDown) return;
-        isDown = false;
-        slider.style.scrollBehavior = 'smooth';
-        snapToNearest();
-      });
-
-      slider.addEventListener('mouseup', () => {
-        if (!isDown) return;
-        isDown = false;
-        slider.style.scrollBehavior = 'smooth';
-        snapToNearest();
-      });
-
-      slider.addEventListener('mousemove', (e) => {
-        if (!isDown) return;
-        e.preventDefault();
-        const x = e.pageX - slider.offsetLeft;
-        const walk = (x - startX) * 1.5;
-        slider.scrollLeft = scrollLeft - walk;
-      });
-
-      function snapToNearest() {
-        const index = Math.round(slider.scrollLeft / slider.clientWidth);
-        const targetX = index * slider.clientWidth;
-        slider.scrollTo({ left: targetX, behavior: 'smooth' });
-
-        const newDate = new Date(currentMonday);
-        newDate.setDate(newDate.getDate() + index);
-        if (!isSameDate(newDate, selectedDate)) {
-          selectedDate = newDate;
-          renderCalendarHeader();
-        }
-      }
-
       slider.addEventListener('scroll', () => {
-        if (isProgrammaticScroll || isDown) return;
+        if (isProgrammaticScroll) return;
 
         clearTimeout(timeout);
         timeout = setTimeout(() => {
