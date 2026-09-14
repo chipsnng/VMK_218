@@ -39,31 +39,33 @@
       font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
 
+    /* Строгий полноэкранный свайпер для любых устройств */
     .snap-slider {
       display: flex;
       overflow-x: auto;
       scroll-snap-type: x mandatory;
       scroll-behavior: smooth;
       -webkit-overflow-scrolling: touch;
+      width: 100%;
     }
 
     .snap-slider::-webkit-scrollbar {
       display: none;
     }
 
-    @media (max-width: 767px) {
-      .snap-item {
-        scroll-snap-align: start;
-        flex: 0 0 100%;
-        width: 100%;
-      }
+    .snap-item {
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
+      flex: 0 0 100%;
+      width: 100%;
+      min-width: 100%;
     }
   </style>
 </head>
 <body class="bg-[#f3f5f9] dark:bg-[#0f111a] text-slate-800 dark:text-slate-100 min-h-screen flex flex-col pb-24 transition-colors duration-300">
 
-  <!-- Верхняя шапка -->
-  <header class="p-4 max-w-6xl w-full mx-auto flex justify-between items-center">
+  <!-- Шапка -->
+  <header class="p-4 max-w-2xl w-full mx-auto flex justify-between items-center">
     <div class="flex items-center gap-3">
       <div class="w-10 h-10 rounded-full bg-brand-600 text-white flex items-center justify-center font-bold text-sm shadow-md shadow-brand-500/20">
         218
@@ -89,8 +91,8 @@
     </div>
   </header>
 
-  <!-- Календарная плашка в форме капсулы (как на референсе) -->
-  <div class="max-w-4xl w-full mx-auto px-4 my-2">
+  <!-- Календарь неделди (Капсула) -->
+  <div class="max-w-2xl w-full mx-auto px-4 my-2">
     <div class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-slate-200/60 dark:border-slate-700/50 rounded-full p-2 shadow-sm">
       <div class="flex items-center justify-between px-3 mb-1 text-[11px] text-slate-400 font-medium">
         <button onclick="changeWeek(-1)" class="hover:text-brand-600 transition-colors">← Пред. неделя</button>
@@ -99,26 +101,26 @@
       </div>
       
       <div class="grid grid-cols-7 gap-1" id="week-days-container">
-        <!-- Дни недели в форме круглых кнопок -->
+        <!-- Круглые кнопки дней -->
       </div>
     </div>
   </div>
 
-  <!-- Главное содержимое расписания -->
-  <main class="max-w-4xl w-full mx-auto flex-1 px-4 mt-4">
-    <div id="slider-container" class="snap-slider md:grid md:grid-cols-1 md:gap-6 md:overflow-visible">
-      <!-- Дни с парами -->
+  <!-- Главная область: Свайпер на 1 день -->
+  <main class="max-w-2xl w-full mx-auto flex-1 overflow-hidden px-4 mt-2">
+    <div id="slider-container" class="snap-slider">
+      <!-- 7 отдельных страниц для каждого дня -->
     </div>
   </main>
 
-  <!-- Навигационная панель снизу (как на скрине) -->
+  <!-- Нижняя навигационная плашка -->
   <div class="fixed bottom-4 left-1/2 -translate-x-1/2 z-30">
     <div class="bg-white/90 dark:bg-slate-800/90 backdrop-blur-2xl border border-slate-200/80 dark:border-slate-700/80 rounded-full p-1.5 shadow-xl flex items-center gap-1">
       <button class="flex items-center gap-2 bg-brand-50 dark:bg-brand-950/80 text-brand-600 dark:text-brand-300 px-5 py-2.5 rounded-full font-semibold text-xs transition-all">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
         <span>Расписание</span>
       </button>
-      <button onclick="alert('Функция ДЗ в разработке')" class="flex items-center gap-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 px-4 py-2.5 rounded-full text-xs font-medium transition-all">
+      <button onclick="alert('Раздел ДЗ')" class="flex items-center gap-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 px-4 py-2.5 rounded-full text-xs font-medium transition-all">
         <span>📝</span>
         <span>ДЗ</span>
       </button>
@@ -210,15 +212,13 @@
         date.setDate(date.getDate() + i);
 
         const page = document.createElement('div');
-        page.className = 'snap-item w-full space-y-3';
+        page.className = 'snap-item w-full flex-shrink-0';
         page.innerHTML = getDayScheduleHTML(date);
 
         slider.appendChild(page);
       }
 
-      if (window.innerWidth < 768) {
-        scrollToSelectedDate(false);
-      }
+      scrollToSelectedDate(false);
     }
 
     function renderCalendarHeader() {
@@ -247,8 +247,6 @@
         const isToday = isSameDate(date, new Date());
 
         const dayBtn = document.createElement('button');
-        
-        // Округлые кнопки (кружки/капсулы для дней)
         dayBtn.className = `flex flex-col items-center justify-center py-2 rounded-full transition-all duration-200 active:scale-90 ${
           isSelected 
             ? 'bg-brand-600 text-white font-bold shadow-md shadow-brand-500/30' 
@@ -265,9 +263,7 @@
         dayBtn.onclick = () => {
           selectedDate = new Date(date);
           renderCalendarHeader();
-          if (window.innerWidth < 768) {
-            scrollToSelectedDate(true);
-          }
+          scrollToSelectedDate(true);
         };
 
         container.appendChild(dayBtn);
@@ -370,8 +366,7 @@
         }
 
         return `
-          <div class="flex gap-3 sm:gap-4 items-stretch">
-            <!-- Левая круглый блок-плашка с временем пары (как на макете) -->
+          <div class="flex gap-3 sm:gap-4 items-stretch mb-3">
             <div class="w-24 sm:w-28 flex-shrink-0 bg-white/70 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-700/50 rounded-3xl p-3 flex flex-col justify-center items-center text-center">
               <span class="text-xs sm:text-sm font-black text-slate-800 dark:text-slate-100">${startTime}</span>
               <span class="text-[11px] font-semibold text-slate-400 mt-0.5">${endTime}</span>
@@ -380,7 +375,6 @@
               </span>
             </div>
 
-            <!-- Правая часть с информацией о предмете -->
             ${cardContentHTML}
           </div>
         `;
@@ -397,7 +391,7 @@
             <span class="text-xs text-slate-400 font-medium">${lessonsCount} пар(ы)</span>
           </div>
         </div>
-        <div class="space-y-3">
+        <div>
           ${lessonsHTML}
         </div>
       `;
@@ -422,7 +416,7 @@
       let timeout = null;
 
       slider.addEventListener('scroll', () => {
-        if (isProgrammaticScroll || window.innerWidth >= 768) return;
+        if (isProgrammaticScroll) return;
 
         clearTimeout(timeout);
         timeout = setTimeout(() => {
