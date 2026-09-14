@@ -1,4 +1,4 @@
-const CACHE_NAME = 'vmk218-v13';
+const CACHE_NAME = 'vmk218-v14';
 const ASSETS = ['./', './index.html', './manifest.json', './schedule.json'];
 
 self.addEventListener('install', (e) => {
