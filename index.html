@@ -6,7 +6,7 @@
   <title>218 ВМК МГУ</title>
   
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#f8f5ff">
+  <meta name="theme-color" content="#f3f4f8">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="218 ВМК">
@@ -18,18 +18,13 @@
       theme: {
         extend: {
           colors: {
-            lavender: {
-              50: '#f8f5ff',
-              100: '#f0ebff',
-              200: '#e1d4fe',
-              300: '#cbb3fc',
-              400: '#af88fa',
-              500: '#935bf6',
-              600: '#7c3aed',
-              700: '#6d28d9',
-              800: '#1e1b2e',
-              900: '#13111f',
-              950: '#0b0a12',
+            brand: {
+              50: '#f0f3ff',
+              100: '#e0e7ff',
+              200: '#c7d2fe',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
             }
           }
         }
@@ -56,7 +51,6 @@
       display: none;
     }
 
-    /* На смартфонах — 1 карточка во весь экран со снайпингом, на планшетах/ПК — сетка */
     @media (max-width: 767px) {
       .snap-item {
         scroll-snap-align: start;
@@ -66,52 +60,70 @@
     }
   </style>
 </head>
-<body class="bg-lavender-50 dark:bg-lavender-950 text-slate-800 dark:text-lavender-100 min-h-screen flex flex-col transition-colors duration-300 overflow-x-hidden">
+<body class="bg-[#f3f5f9] dark:bg-[#0f111a] text-slate-800 dark:text-slate-100 min-h-screen flex flex-col pb-24 transition-colors duration-300">
 
-  <!-- Шапка -->
-  <header class="bg-white/80 dark:bg-lavender-900/80 border-b border-lavender-200/60 dark:border-lavender-800/60 p-4 sticky top-0 z-20 backdrop-blur-xl transition-colors">
-    <div class="max-w-7xl mx-auto flex justify-between items-center px-2 sm:px-4">
+  <!-- Верхняя шапка -->
+  <header class="p-4 max-w-6xl w-full mx-auto flex justify-between items-center">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-full bg-brand-600 text-white flex items-center justify-center font-bold text-sm shadow-md shadow-brand-500/20">
+        218
+      </div>
       <div>
-        <div class="flex items-center gap-2">
-          <h1 class="font-bold text-xl text-lavender-700 dark:text-lavender-300 tracking-tight">218 Группа</h1>
-          <span id="week-parity-badge" class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-lavender-100 dark:bg-lavender-800 text-lavender-700 dark:text-lavender-300 border border-lavender-200 dark:border-lavender-700">
+        <h1 class="font-extrabold text-lg leading-tight tracking-tight text-slate-900 dark:text-white">ВМК МГУ</h1>
+        <div class="flex items-center gap-2 mt-0.5">
+          <span id="week-parity-badge" class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-brand-100 dark:bg-brand-950 text-brand-600 dark:text-brand-300">
             --
           </span>
+          <span class="text-xs text-slate-400" id="current-month-year">...</span>
         </div>
-        <p class="text-xs text-slate-500 dark:text-lavender-400 mt-0.5" id="current-month-year">ВМК МГУ</p>
       </div>
-      
-      <div class="flex items-center gap-2">
-        <button onclick="toggleTheme()" class="p-2 rounded-full bg-lavender-100 dark:bg-lavender-800 text-lavender-700 dark:text-lavender-200 active:scale-90 transition-transform">
-          <span id="theme-icon">🌙</span>
-        </button>
-        <button onclick="goToToday()" class="text-xs bg-lavender-600 hover:bg-lavender-700 text-white font-medium px-3.5 py-2 rounded-full shadow-sm active:scale-90 transition-transform">
-          Сегодня
-        </button>
-      </div>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <button onclick="toggleTheme()" class="w-10 h-10 rounded-full bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-200 shadow-sm flex items-center justify-center active:scale-95 transition-all">
+        <span id="theme-icon">🌙</span>
+      </button>
+      <button onclick="goToToday()" class="text-xs bg-brand-600 hover:bg-brand-700 text-white font-semibold px-4 py-2.5 rounded-full shadow-md shadow-brand-500/20 active:scale-95 transition-all">
+        Сегодня
+      </button>
     </div>
   </header>
 
-  <!-- Календарь на неделю -->
-  <div class="bg-white/60 dark:bg-lavender-900/40 border-b border-lavender-200/50 dark:border-lavender-800/50 sticky top-[73px] z-10 backdrop-blur-md transition-colors">
-    <div class="max-w-7xl mx-auto px-3 py-2.5">
-      <div class="flex items-center justify-between mb-2 px-1 text-xs text-slate-500 dark:text-lavender-400 font-medium max-w-md md:max-w-none mx-auto">
-        <button onclick="changeWeek(-1)" class="p-1 active:scale-90 transition-transform">← Пред. неделя</button>
-        <span id="week-range-label" class="text-slate-700 dark:text-lavender-200 font-semibold"></span>
-        <button onclick="changeWeek(1)" class="p-1 active:scale-90 transition-transform">След. неделя →</button>
+  <!-- Календарная плашка в форме капсулы (как на референсе) -->
+  <div class="max-w-4xl w-full mx-auto px-4 my-2">
+    <div class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-slate-200/60 dark:border-slate-700/50 rounded-full p-2 shadow-sm">
+      <div class="flex items-center justify-between px-3 mb-1 text-[11px] text-slate-400 font-medium">
+        <button onclick="changeWeek(-1)" class="hover:text-brand-600 transition-colors">← Пред. неделя</button>
+        <span id="week-range-label" class="text-slate-700 dark:text-slate-200 font-bold"></span>
+        <button onclick="changeWeek(1)" class="hover:text-brand-600 transition-colors">След. неделя →</button>
       </div>
-      <div class="grid grid-cols-7 gap-1 text-center max-w-3xl mx-auto" id="week-days-container">
-        <!-- Дни недели -->
+      
+      <div class="grid grid-cols-7 gap-1" id="week-days-container">
+        <!-- Дни недели в форме круглых кнопок -->
       </div>
     </div>
   </div>
 
-  <!-- Главный блок: Слайдер для мобилок + Автоматическая сетка на ПК -->
-  <main class="max-w-7xl mx-auto flex-1 w-full overflow-hidden p-2 md:p-6">
-    <div id="slider-container" class="snap-slider md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-6 md:overflow-visible">
-      <!-- Страницы дней -->
+  <!-- Главное содержимое расписания -->
+  <main class="max-w-4xl w-full mx-auto flex-1 px-4 mt-4">
+    <div id="slider-container" class="snap-slider md:grid md:grid-cols-1 md:gap-6 md:overflow-visible">
+      <!-- Дни с парами -->
     </div>
   </main>
+
+  <!-- Навигационная панель снизу (как на скрине) -->
+  <div class="fixed bottom-4 left-1/2 -translate-x-1/2 z-30">
+    <div class="bg-white/90 dark:bg-slate-800/90 backdrop-blur-2xl border border-slate-200/80 dark:border-slate-700/80 rounded-full p-1.5 shadow-xl flex items-center gap-1">
+      <button class="flex items-center gap-2 bg-brand-50 dark:bg-brand-950/80 text-brand-600 dark:text-brand-300 px-5 py-2.5 rounded-full font-semibold text-xs transition-all">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+        <span>Расписание</span>
+      </button>
+      <button onclick="alert('Функция ДЗ в разработке')" class="flex items-center gap-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 px-4 py-2.5 rounded-full text-xs font-medium transition-all">
+        <span>📝</span>
+        <span>ДЗ</span>
+      </button>
+    </div>
+  </div>
 
   <script>
     let scheduleData = null;
@@ -120,7 +132,7 @@
     let isProgrammaticScroll = false;
 
     const dayNames = ["Воскресенье", "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"];
-    const monthNames = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"];
+    const monthNames = ["Января", "Февраля", "Марта", "Апреля", "Мая", "Июня", "Июля", "Августа", "Сентября", "Октября", "Ноября", "Декабря"];
 
     function getMonday(d) {
       const date = new Date(d);
@@ -171,7 +183,7 @@
         setupScrollListener();
       } catch (err) {
         document.getElementById('slider-container').innerHTML = 
-          '<div class="w-full col-span-full p-4 text-center text-red-500">Ошибка загрузки расписания</div>';
+          '<div class="w-full text-center p-8 text-red-500 font-medium">Ошибка загрузки расписания</div>';
       }
     }
 
@@ -198,8 +210,7 @@
         date.setDate(date.getDate() + i);
 
         const page = document.createElement('div');
-        // На мобилках - snap-item, на ПК - адаптивная плашка
-        page.className = 'snap-item p-3 md:p-5 box-border bg-white/40 dark:bg-lavender-900/20 md:border md:border-lavender-200/50 md:dark:border-lavender-800/50 md:rounded-3xl md:shadow-sm';
+        page.className = 'snap-item w-full space-y-3';
         page.innerHTML = getDayScheduleHTML(date);
 
         slider.appendChild(page);
@@ -218,13 +229,15 @@
       sunday.setDate(sunday.getDate() + 6);
 
       const parity = getWeekParity(selectedDate);
-      document.getElementById('week-parity-badge').innerText = `${parity.label}`;
+      document.getElementById('week-parity-badge').innerText = `${parity.label} неделя`;
 
       document.getElementById('week-range-label').innerText = 
         `${currentMonday.getDate()} ${monthNames[currentMonday.getMonth()].slice(0, 3)} — ${sunday.getDate()} ${monthNames[sunday.getMonth()].slice(0, 3)}`;
 
       document.getElementById('current-month-year').innerText = 
-        `${monthNames[selectedDate.getMonth()]} ${selectedDate.getFullYear()}`;
+        `${selectedDate.getFullYear()} г.`;
+
+      const shortDays = ["вс", "пн", "вт", "ср", "чт", "пт", "сб"];
 
       for (let i = 0; i < 7; i++) {
         const date = new Date(currentMonday);
@@ -234,18 +247,19 @@
         const isToday = isSameDate(date, new Date());
 
         const dayBtn = document.createElement('button');
-        dayBtn.className = `flex flex-col items-center py-2 px-1 rounded-2xl transition-all duration-200 active:scale-90 ${
+        
+        // Округлые кнопки (кружки/капсулы для дней)
+        dayBtn.className = `flex flex-col items-center justify-center py-2 rounded-full transition-all duration-200 active:scale-90 ${
           isSelected 
-            ? 'bg-lavender-600 text-white font-bold shadow-lg shadow-lavender-600/30' 
+            ? 'bg-brand-600 text-white font-bold shadow-md shadow-brand-500/30' 
             : isToday 
-              ? 'bg-lavender-200/70 dark:bg-lavender-800/80 text-lavender-700 dark:text-lavender-300 font-semibold border border-lavender-300 dark:border-lavender-700' 
-              : 'text-slate-500 dark:text-lavender-400 hover:bg-lavender-100/50 dark:hover:bg-lavender-800/50'
+              ? 'bg-brand-100 dark:bg-slate-700 text-brand-700 dark:text-brand-300 font-bold border border-brand-300 dark:border-slate-600' 
+              : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700/50'
         }`;
 
-        const shortDays = ["Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"];
         dayBtn.innerHTML = `
-          <span class="text-[10px] uppercase mb-0.5 opacity-70">${shortDays[date.getDay()]}</span>
-          <span class="text-sm">${date.getDate()}</span>
+          <span class="text-[10px] uppercase font-semibold opacity-60">${shortDays[date.getDay()]}</span>
+          <span class="text-xs sm:text-sm font-bold mt-0.5">${date.getDate()}</span>
         `;
 
         dayBtn.onclick = () => {
@@ -262,36 +276,43 @@
 
     function renderSingleLessonCard(lesson, isActive = true) {
       const isLecture = lesson.type === 'Лекция';
+      
       const badgeColor = isActive 
         ? (isLecture 
-            ? 'bg-purple-100 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800' 
-            : 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800')
-        : 'bg-slate-100 dark:bg-slate-800 text-slate-500 border-slate-200 dark:border-slate-700';
+            ? 'bg-purple-100 dark:bg-purple-950/80 text-purple-600 dark:text-purple-300' 
+            : 'bg-brand-100 dark:bg-brand-950/80 text-brand-600 dark:text-brand-300')
+        : 'bg-slate-100 dark:bg-slate-800 text-slate-400';
 
       const parityTag = lesson.parity 
         ? (lesson.parity === 'odd' ? 'Нечётная' : 'Чётная') 
         : null;
 
       return `
-        <div class="p-3.5 transition-all ${isActive ? '' : 'opacity-40 grayscale-[40%]'}" ${!isActive ? 'style="filter: grayscale(0.5);"' : ''}>
-          <div class="flex justify-between items-center mb-1 gap-1">
-            <div class="flex items-center gap-1.5">
+        <div class="p-4 sm:p-5 flex-1 flex flex-col justify-between ${isActive ? '' : 'opacity-40'}">
+          <div>
+            <div class="flex items-center gap-2 mb-2">
+              <span class="text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full ${badgeColor}">
+                ${lesson.type}
+              </span>
               ${parityTag ? `
-                <span class="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${isActive ? 'bg-lavender-600 text-white' : 'bg-slate-300 dark:bg-slate-700 text-slate-600 dark:text-slate-300'}">
+                <span class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
                   ${parityTag}
                 </span>
               ` : ''}
-              <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full border ${badgeColor}">
-                ${lesson.type}
-              </span>
             </div>
-            <span class="text-xs font-semibold ${isActive ? 'text-lavender-700 dark:text-lavender-300 bg-lavender-50 dark:bg-lavender-800/60' : 'text-slate-500 bg-slate-100 dark:bg-slate-800'} px-2 py-0.5 rounded-md">
-              📍 ${lesson.room}
-            </span>
+
+            <h3 class="font-bold text-slate-900 dark:text-white text-base sm:text-lg leading-snug mb-2">
+              ${lesson.subject}
+            </h3>
           </div>
-          <div class="font-semibold text-slate-800 dark:text-lavender-50 text-sm my-1 leading-snug">${lesson.subject}</div>
-          <div class="text-xs text-slate-500 dark:text-lavender-400 pt-1 truncate">
-            👤 ${lesson.teacher}
+
+          <div class="flex flex-wrap items-center gap-y-1 gap-x-4 text-xs text-slate-400 dark:text-slate-400 pt-2 border-t border-slate-100 dark:border-slate-800">
+            <span class="flex items-center gap-1 font-medium text-slate-500 dark:text-slate-300">
+              👤 ${lesson.teacher}
+            </span>
+            <span class="flex items-center gap-1 font-semibold text-slate-600 dark:text-slate-200">
+              🏛️ ауд. ${lesson.room}
+            </span>
           </div>
         </div>
       `;
@@ -300,13 +321,14 @@
     function getDayScheduleHTML(date) {
       const dayIndex = date.getDay(); 
       const dayName = dayNames[dayIndex];
+      const isToday = isSameDate(date, new Date());
 
       if (dayIndex === 0) {
         return `
-          <div class="text-center py-16 text-slate-400 dark:text-lavender-500">
-            <div class="text-5xl mb-3">☕</div>
-            <p class="font-semibold text-slate-700 dark:text-lavender-200 text-lg">Воскресенье</p>
-            <p class="text-xs text-slate-400 dark:text-lavender-400 mt-1">Отдыхайте перед учебной неделей</p>
+          <div class="bg-white/60 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-700/50 rounded-3xl p-12 text-center">
+            <div class="w-16 h-16 bg-brand-50 dark:bg-slate-700 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl">☕</div>
+            <h2 class="font-bold text-slate-800 dark:text-white text-xl">Воскресенье</h2>
+            <p class="text-xs text-slate-400 mt-1">Занятий нет, время отдыхать</p>
           </div>`;
       }
 
@@ -315,54 +337,69 @@
 
       if (!dayData || !dayData.lessons || dayData.lessons.length === 0) {
         return `
-          <div class="text-center py-16 text-slate-400 dark:text-lavender-500">
-            <p class="font-medium">Занятий нет</p>
+          <div class="bg-white/60 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-700/50 rounded-3xl p-12 text-center">
+            <p class="font-bold text-slate-500">Занятий нет</p>
           </div>`;
       }
 
-      let lessonsHTML = dayData.lessons.map(item => {
+      let lessonsCount = dayData.lessons.length;
+
+      let lessonsHTML = dayData.lessons.map((item, index) => {
         const times = item.time.split(' - ');
         const startTime = times[0] || item.time;
         const endTime = times[1] || '';
 
-        let cardBodyHTML = '';
+        let cardContentHTML = '';
 
         if (item.parity_split) {
           const oddLesson = item.parity_split.find(p => p.parity === 'odd') || item.parity_split[0];
           const evenLesson = item.parity_split.find(p => p.parity === 'even') || item.parity_split[1];
 
-          cardBodyHTML = `
-            <div class="flex flex-col border border-lavender-200/70 dark:border-lavender-800/80 rounded-2xl bg-white dark:bg-lavender-900/90 shadow-sm overflow-hidden flex-1 divide-y divide-lavender-100 dark:divide-lavender-800/60">
+          cardContentHTML = `
+            <div class="flex-1 flex flex-col bg-white dark:bg-slate-800/90 rounded-3xl border border-slate-200/80 dark:border-slate-700/80 shadow-sm overflow-hidden divide-y divide-slate-100 dark:divide-slate-700/60">
               ${renderSingleLessonCard(oddLesson, parity.key === 'odd')}
               ${renderSingleLessonCard(evenLesson, parity.key === 'even')}
             </div>
           `;
         } else {
-          cardBodyHTML = `
-            <div class="flex-1 bg-white dark:bg-lavender-900/90 border border-lavender-200/70 dark:border-lavender-800/80 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
+          cardContentHTML = `
+            <div class="flex-1 bg-white dark:bg-slate-800/90 rounded-3xl border border-slate-200/80 dark:border-slate-700/80 shadow-sm overflow-hidden">
               ${renderSingleLessonCard(item, true)}
             </div>
           `;
         }
 
         return `
-          <div class="flex gap-3 mb-3.5 items-stretch">
-            <div class="w-16 flex-shrink-0 flex flex-col justify-center items-center text-center bg-white/50 dark:bg-lavender-900/30 rounded-2xl border border-lavender-100 dark:border-lavender-800/40 p-2">
-              <span class="text-xs font-bold text-slate-800 dark:text-lavender-100">${startTime}</span>
-              ${endTime ? `<span class="text-[10px] text-slate-400 dark:text-lavender-400 mt-0.5">${endTime}</span>` : ''}
+          <div class="flex gap-3 sm:gap-4 items-stretch">
+            <!-- Левая круглый блок-плашка с временем пары (как на макете) -->
+            <div class="w-24 sm:w-28 flex-shrink-0 bg-white/70 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-700/50 rounded-3xl p-3 flex flex-col justify-center items-center text-center">
+              <span class="text-xs sm:text-sm font-black text-slate-800 dark:text-slate-100">${startTime}</span>
+              <span class="text-[11px] font-semibold text-slate-400 mt-0.5">${endTime}</span>
+              <span class="text-[9px] font-medium text-slate-400 dark:text-slate-500 mt-2 bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded-full">
+                ${index + 1} пара
+              </span>
             </div>
 
-            ${cardBodyHTML}
+            <!-- Правая часть с информацией о предмете -->
+            ${cardContentHTML}
           </div>
         `;
       }).join('');
 
       return `
-        <div class="mb-4 px-1 flex justify-between items-baseline">
-          <h2 class="font-bold text-slate-800 dark:text-lavender-100 text-xl tracking-tight">${dayName}</h2>
-          <span class="text-xs text-slate-400 dark:text-lavender-400 font-medium">${date.getDate()} ${monthNames[date.getMonth()]}</span>
+        <div class="flex items-center justify-between mb-3 px-2">
+          <div class="flex items-center gap-2">
+            <h2 class="font-extrabold text-slate-900 dark:text-white text-2xl tracking-tight">${dayName}</h2>
+            <span class="text-sm font-medium text-slate-400">· ${date.getDate()} ${monthNames[date.getMonth()]}</span>
+          </div>
+          <div class="flex items-center gap-2">
+            ${isToday ? '<span class="text-[10px] font-black uppercase px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-950/80 dark:text-emerald-400">Сегодня</span>' : ''}
+            <span class="text-xs text-slate-400 font-medium">${lessonsCount} пар(ы)</span>
+          </div>
         </div>
-        ${lessonsHTML}
+        <div class="space-y-3">
+          ${lessonsHTML}
+        </div>
       `;
     }
 
