@@ -6,11 +6,15 @@
   <title>218 ВМК МГУ</title>
   
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#f3f4f8">
+  <meta name="theme-color" content="#f5f0ff">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="218 ВМК">
   
+  <!-- Иконка приложения (PWA) при добавлении на домашний экран -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='128' fill='%237c3aed'/><text x='50%' y='55%' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-weight='900' font-size='180' fill='%23ffffff'>218</text></svg>">
+  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='128' fill='%237c3aed'/><text x='50%' y='55%' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-weight='900' font-size='180' fill='%23ffffff'>218</text></svg>">
+
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -19,12 +23,20 @@
         extend: {
           colors: {
             brand: {
-              50: '#f0f3ff',
-              100: '#e0e7ff',
-              200: '#c7d2fe',
-              500: '#6366f1',
-              600: '#4f46e5',
-              700: '#4338ca',
+              50: '#f5f0ff',
+              100: '#ede4ff',
+              200: '#ddccff',
+              300: '#c4a3ff',
+              400: '#a870ff',
+              500: '#8b3dff',
+              600: '#7c3aed', // Захватывающий фиолетовый в светлой теме
+              700: '#6d28d9',
+              // Мягкие, менее контрастные тона для темной темы:
+              darkBg: '#13111c',
+              darkCard: '#1d1a29',
+              darkSubCard: '#272338',
+              darkText: '#e2d9f3',
+              darkAccent: '#b490ff'
             }
           }
         }
@@ -39,7 +51,6 @@
       font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
 
-    /* Строгий полноэкранный свайпер для любых устройств */
     .snap-slider {
       display: flex;
       overflow-x: auto;
@@ -47,6 +58,11 @@
       scroll-behavior: smooth;
       -webkit-overflow-scrolling: touch;
       width: 100%;
+      cursor: grab;
+    }
+
+    .snap-slider:active {
+      cursor: grabbing;
     }
 
     .snap-slider::-webkit-scrollbar {
@@ -62,65 +78,65 @@
     }
   </style>
 </head>
-<body class="bg-[#f3f5f9] dark:bg-[#0f111a] text-slate-800 dark:text-slate-100 min-h-screen flex flex-col pb-24 transition-colors duration-300">
+<body class="bg-brand-50 dark:bg-brand-darkBg text-slate-800 dark:text-brand-darkText min-h-screen flex flex-col pb-24 transition-colors duration-300">
 
   <!-- Шапка -->
   <header class="p-4 max-w-2xl w-full mx-auto flex justify-between items-center">
     <div class="flex items-center gap-3">
-      <div class="w-10 h-10 rounded-full bg-brand-600 text-white flex items-center justify-center font-bold text-sm shadow-md shadow-brand-500/20">
+      <div class="w-10 h-10 rounded-full bg-brand-600 dark:bg-brand-darkAccent text-white dark:text-brand-darkBg flex items-center justify-center font-black text-sm shadow-md shadow-brand-600/30">
         218
       </div>
       <div>
-        <h1 class="font-extrabold text-lg leading-tight tracking-tight text-slate-900 dark:text-white">ВМК МГУ</h1>
+        <h1 class="font-extrabold text-lg leading-tight tracking-tight text-brand-700 dark:text-brand-darkAccent">ВМК МГУ</h1>
         <div class="flex items-center gap-2 mt-0.5">
-          <span id="week-parity-badge" class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-brand-100 dark:bg-brand-950 text-brand-600 dark:text-brand-300">
+          <span id="week-parity-badge" class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-brand-200 dark:bg-brand-darkSubCard text-brand-700 dark:text-brand-darkAccent">
             --
           </span>
-          <span class="text-xs text-slate-400" id="current-month-year">...</span>
+          <span class="text-xs text-slate-400 dark:text-slate-400" id="current-month-year">...</span>
         </div>
       </div>
     </div>
 
     <div class="flex items-center gap-2">
-      <button onclick="toggleTheme()" class="w-10 h-10 rounded-full bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-200 shadow-sm flex items-center justify-center active:scale-95 transition-all">
+      <button onclick="toggleTheme()" class="w-10 h-10 rounded-full bg-white dark:bg-brand-darkCard text-slate-600 dark:text-brand-darkAccent shadow-sm flex items-center justify-center active:scale-95 transition-all">
         <span id="theme-icon">🌙</span>
       </button>
-      <button onclick="goToToday()" class="text-xs bg-brand-600 hover:bg-brand-700 text-white font-semibold px-4 py-2.5 rounded-full shadow-md shadow-brand-500/20 active:scale-95 transition-all">
+      <button onclick="goToToday()" class="text-xs bg-brand-600 hover:bg-brand-700 dark:bg-brand-darkAccent dark:text-brand-darkBg text-white font-bold px-4 py-2.5 rounded-full shadow-md shadow-brand-600/20 active:scale-95 transition-all">
         Сегодня
       </button>
     </div>
   </header>
 
-  <!-- Календарь неделди (Капсула) -->
+  <!-- Календарь недели -->
   <div class="max-w-2xl w-full mx-auto px-4 my-2">
-    <div class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-slate-200/60 dark:border-slate-700/50 rounded-full p-2 shadow-sm">
-      <div class="flex items-center justify-between px-3 mb-1 text-[11px] text-slate-400 font-medium">
-        <button onclick="changeWeek(-1)" class="hover:text-brand-600 transition-colors">← Пред. неделя</button>
-        <span id="week-range-label" class="text-slate-700 dark:text-slate-200 font-bold"></span>
-        <button onclick="changeWeek(1)" class="hover:text-brand-600 transition-colors">След. неделя →</button>
+    <div class="bg-white/90 dark:bg-brand-darkCard/90 backdrop-blur-xl border border-brand-100 dark:border-brand-darkSubCard rounded-full p-2 shadow-sm">
+      <div class="flex items-center justify-between px-3 mb-1 text-[11px] text-slate-400 dark:text-slate-400 font-medium">
+        <button onclick="changeWeek(-1)" class="hover:text-brand-600 dark:hover:text-brand-darkAccent transition-colors">← Пред. неделя</button>
+        <span id="week-range-label" class="text-brand-700 dark:text-brand-darkAccent font-bold"></span>
+        <button onclick="changeWeek(1)" class="hover:text-brand-600 dark:hover:text-brand-darkAccent transition-colors">След. неделя →</button>
       </div>
       
       <div class="grid grid-cols-7 gap-1" id="week-days-container">
-        <!-- Круглые кнопки дней -->
+        <!-- Кнопки дней -->
       </div>
     </div>
   </div>
 
-  <!-- Главная область: Свайпер на 1 день -->
+  <!-- Главный слайдер -->
   <main class="max-w-2xl w-full mx-auto flex-1 overflow-hidden px-4 mt-2">
     <div id="slider-container" class="snap-slider">
-      <!-- 7 отдельных страниц для каждого дня -->
+      <!-- Страницы дней -->
     </div>
   </main>
 
-  <!-- Нижняя навигационная плашка -->
+  <!-- Нижняя панель -->
   <div class="fixed bottom-4 left-1/2 -translate-x-1/2 z-30">
-    <div class="bg-white/90 dark:bg-slate-800/90 backdrop-blur-2xl border border-slate-200/80 dark:border-slate-700/80 rounded-full p-1.5 shadow-xl flex items-center gap-1">
-      <button class="flex items-center gap-2 bg-brand-50 dark:bg-brand-950/80 text-brand-600 dark:text-brand-300 px-5 py-2.5 rounded-full font-semibold text-xs transition-all">
+    <div class="bg-white/90 dark:bg-brand-darkCard/90 backdrop-blur-2xl border border-brand-100 dark:border-brand-darkSubCard rounded-full p-1.5 shadow-xl flex items-center gap-1">
+      <button class="flex items-center gap-2 bg-brand-100 dark:bg-brand-darkSubCard text-brand-700 dark:text-brand-darkAccent px-5 py-2.5 rounded-full font-bold text-xs transition-all">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
         <span>Расписание</span>
       </button>
-      <button onclick="alert('Раздел ДЗ')" class="flex items-center gap-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 px-4 py-2.5 rounded-full text-xs font-medium transition-all">
+      <button onclick="alert('Раздел ДЗ в разработке')" class="flex items-center gap-1.5 text-slate-400 dark:text-slate-400 hover:text-brand-600 dark:hover:text-brand-darkAccent px-4 py-2.5 rounded-full text-xs font-medium transition-all">
         <span>📝</span>
         <span>ДЗ</span>
       </button>
@@ -132,6 +148,16 @@
     let currentMonday = getMonday(new Date());
     let selectedDate = new Date();
     let isProgrammaticScroll = false;
+
+    // Эталонное время для пар ВМК
+    const standardTimes = [
+      "08:45 - 10:20",
+      "10:30 - 12:05",
+      "12:50 - 14:25",
+      "14:35 - 16:10",
+      "16:20 - 17:55",
+      "18:00 - 19:35"
+    ];
 
     const dayNames = ["Воскресенье", "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"];
     const monthNames = ["Января", "Февраля", "Марта", "Апреля", "Мая", "Июня", "Июля", "Августа", "Сентября", "Октября", "Ноября", "Декабря"];
@@ -182,10 +208,10 @@
         const response = await fetch('schedule.json');
         scheduleData = await response.json();
         renderWeekPages();
-        setupScrollListener();
+        setupScrollAndDrag();
       } catch (err) {
         document.getElementById('slider-container').innerHTML = 
-          '<div class="w-full text-center p-8 text-red-500 font-medium">Ошибка загрузки расписания</div>';
+          '<div class="w-full text-center p-8 text-red-500 font-medium">Ошибка загрузки schedule.json</div>';
       }
     }
 
@@ -249,10 +275,10 @@
         const dayBtn = document.createElement('button');
         dayBtn.className = `flex flex-col items-center justify-center py-2 rounded-full transition-all duration-200 active:scale-90 ${
           isSelected 
-            ? 'bg-brand-600 text-white font-bold shadow-md shadow-brand-500/30' 
+            ? 'bg-brand-600 dark:bg-brand-darkAccent text-white dark:text-brand-darkBg font-black shadow-md shadow-brand-600/30' 
             : isToday 
-              ? 'bg-brand-100 dark:bg-slate-700 text-brand-700 dark:text-brand-300 font-bold border border-brand-300 dark:border-slate-600' 
-              : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700/50'
+              ? 'bg-brand-200 dark:bg-brand-darkSubCard text-brand-700 dark:text-brand-darkAccent font-bold border border-brand-300 dark:border-slate-600' 
+              : 'text-slate-500 dark:text-slate-400 hover:bg-brand-100 dark:hover:bg-brand-darkSubCard/50'
         }`;
 
         dayBtn.innerHTML = `
@@ -275,8 +301,8 @@
       
       const badgeColor = isActive 
         ? (isLecture 
-            ? 'bg-purple-100 dark:bg-purple-950/80 text-purple-600 dark:text-purple-300' 
-            : 'bg-brand-100 dark:bg-brand-950/80 text-brand-600 dark:text-brand-300')
+            ? 'bg-purple-100 dark:bg-purple-950/60 text-purple-600 dark:text-purple-300' 
+            : 'bg-brand-100 dark:bg-brand-darkSubCard text-brand-600 dark:text-brand-darkAccent')
         : 'bg-slate-100 dark:bg-slate-800 text-slate-400';
 
       const parityTag = lesson.parity 
@@ -291,13 +317,13 @@
                 ${lesson.type}
               </span>
               ${parityTag ? `
-                <span class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
+                <span class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
                   ${parityTag}
                 </span>
               ` : ''}
             </div>
 
-            <h3 class="font-bold text-slate-900 dark:text-white text-base sm:text-lg leading-snug mb-2">
+            <h3 class="font-bold text-slate-900 dark:text-brand-darkText text-base sm:text-lg leading-snug mb-2">
               ${lesson.subject}
             </h3>
           </div>
@@ -314,6 +340,14 @@
       `;
     }
 
+    function renderWindowCard() {
+      return `
+        <div class="flex-1 bg-white/40 dark:bg-brand-darkCard/30 rounded-3xl border border-dashed border-slate-200 dark:border-slate-800 p-4 flex items-center justify-center">
+          <span class="text-xs font-semibold text-slate-400 dark:text-slate-500">Окно</span>
+        </div>
+      `;
+    }
+
     function getDayScheduleHTML(date) {
       const dayIndex = date.getDay(); 
       const dayName = dayNames[dayIndex];
@@ -321,10 +355,10 @@
 
       if (dayIndex === 0) {
         return `
-          <div class="bg-white/60 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-700/50 rounded-3xl p-12 text-center">
-            <div class="w-16 h-16 bg-brand-50 dark:bg-slate-700 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl">☕</div>
-            <h2 class="font-bold text-slate-800 dark:text-white text-xl">Воскресенье</h2>
-            <p class="text-xs text-slate-400 mt-1">Занятий нет, время отдыхать</p>
+          <div class="bg-white/70 dark:bg-brand-darkCard/60 border border-brand-100 dark:border-brand-darkSubCard rounded-3xl p-12 text-center shadow-sm">
+            <div class="w-16 h-16 bg-brand-100 dark:bg-brand-darkSubCard rounded-full flex items-center justify-center mx-auto mb-3 text-2xl">☕</div>
+            <h2 class="font-bold text-slate-800 dark:text-brand-darkText text-xl">Воскресенье</h2>
+            <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">Занятий нет, время отдыхать</p>
           </div>`;
       }
 
@@ -333,66 +367,91 @@
 
       if (!dayData || !dayData.lessons || dayData.lessons.length === 0) {
         return `
-          <div class="bg-white/60 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-700/50 rounded-3xl p-12 text-center">
-            <p class="font-bold text-slate-500">Занятий нет</p>
+          <div class="bg-white/70 dark:bg-brand-darkCard/60 border border-brand-100 dark:border-brand-darkSubCard rounded-3xl p-12 text-center shadow-sm">
+            <p class="font-bold text-slate-400 dark:text-slate-500">Занятий нет</p>
           </div>`;
       }
 
-      let lessonsCount = dayData.lessons.length;
+      // 1. Определение позиции пары (1..6)
+      const lessonSlots = {};
+      let maxSlot = 0;
 
-      let lessonsHTML = dayData.lessons.map((item, index) => {
-        const times = item.time.split(' - ');
-        const startTime = times[0] || item.time;
+      dayData.lessons.forEach(item => {
+        let slotIndex = item.number ? parseInt(item.number) : 0;
+        if (!slotIndex) {
+          const startTime = item.time.split(' - ')[0];
+          slotIndex = standardTimes.findIndex(t => t.startsWith(startTime)) + 1;
+        }
+        if (slotIndex > 0) {
+          lessonSlots[slotIndex] = item;
+          if (slotIndex > maxSlot) maxSlot = slotIndex;
+        }
+      });
+
+      // 2. Добавление «Окон» сверху и внутри расписания
+      let fullItemsHTML = '';
+      let activeLessonsCount = 0;
+
+      for (let slot = 1; slot <= maxSlot; slot++) {
+        const timeStr = standardTimes[slot - 1] || "Пара " + slot;
+        const times = timeStr.split(' - ');
+        const startTime = times[0];
         const endTime = times[1] || '';
 
-        let cardContentHTML = '';
+        const item = lessonSlots[slot];
 
-        if (item.parity_split) {
-          const oddLesson = item.parity_split.find(p => p.parity === 'odd') || item.parity_split[0];
-          const evenLesson = item.parity_split.find(p => p.parity === 'even') || item.parity_split[1];
+        let rightCardHTML = '';
 
-          cardContentHTML = `
-            <div class="flex-1 flex flex-col bg-white dark:bg-slate-800/90 rounded-3xl border border-slate-200/80 dark:border-slate-700/80 shadow-sm overflow-hidden divide-y divide-slate-100 dark:divide-slate-700/60">
-              ${renderSingleLessonCard(oddLesson, parity.key === 'odd')}
-              ${renderSingleLessonCard(evenLesson, parity.key === 'even')}
-            </div>
-          `;
+        if (!item) {
+          rightCardHTML = renderWindowCard();
         } else {
-          cardContentHTML = `
-            <div class="flex-1 bg-white dark:bg-slate-800/90 rounded-3xl border border-slate-200/80 dark:border-slate-700/80 shadow-sm overflow-hidden">
-              ${renderSingleLessonCard(item, true)}
-            </div>
-          `;
+          activeLessonsCount++;
+          if (item.parity_split) {
+            const oddLesson = item.parity_split.find(p => p.parity === 'odd') || item.parity_split[0];
+            const evenLesson = item.parity_split.find(p => p.parity === 'even') || item.parity_split[1];
+
+            rightCardHTML = `
+              <div class="flex-1 flex flex-col bg-white dark:bg-brand-darkCard rounded-3xl border border-brand-100 dark:border-brand-darkSubCard shadow-sm overflow-hidden divide-y divide-slate-100 dark:divide-slate-800">
+                ${renderSingleLessonCard(oddLesson, parity.key === 'odd')}
+                ${renderSingleLessonCard(evenLesson, parity.key === 'even')}
+              </div>
+            `;
+          } else {
+            rightCardHTML = `
+              <div class="flex-1 bg-white dark:bg-brand-darkCard rounded-3xl border border-brand-100 dark:border-brand-darkSubCard shadow-sm overflow-hidden">
+                ${renderSingleLessonCard(item, true)}
+              </div>
+            `;
+          }
         }
 
-        return `
+        fullItemsHTML += `
           <div class="flex gap-3 sm:gap-4 items-stretch mb-3">
-            <div class="w-24 sm:w-28 flex-shrink-0 bg-white/70 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-700/50 rounded-3xl p-3 flex flex-col justify-center items-center text-center">
-              <span class="text-xs sm:text-sm font-black text-slate-800 dark:text-slate-100">${startTime}</span>
+            <div class="w-24 sm:w-28 flex-shrink-0 bg-white/80 dark:bg-brand-darkCard/80 border border-brand-100 dark:border-brand-darkSubCard rounded-3xl p-3 flex flex-col justify-center items-center text-center shadow-sm">
+              <span class="text-xs sm:text-sm font-black text-slate-800 dark:text-brand-darkText">${startTime}</span>
               <span class="text-[11px] font-semibold text-slate-400 mt-0.5">${endTime}</span>
-              <span class="text-[9px] font-medium text-slate-400 dark:text-slate-500 mt-2 bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded-full">
-                ${index + 1} пара
+              <span class="text-[9px] font-bold text-slate-400 dark:text-slate-500 mt-2 bg-slate-100 dark:bg-brand-darkSubCard px-2 py-0.5 rounded-full">
+                ${slot} пара
               </span>
             </div>
-
-            ${cardContentHTML}
+            ${rightCardHTML}
           </div>
         `;
-      }).join('');
+      }
 
       return `
         <div class="flex items-center justify-between mb-3 px-2">
           <div class="flex items-center gap-2">
-            <h2 class="font-extrabold text-slate-900 dark:text-white text-2xl tracking-tight">${dayName}</h2>
+            <h2 class="font-extrabold text-slate-900 dark:text-brand-darkText text-2xl tracking-tight">${dayName}</h2>
             <span class="text-sm font-medium text-slate-400">· ${date.getDate()} ${monthNames[date.getMonth()]}</span>
           </div>
           <div class="flex items-center gap-2">
             ${isToday ? '<span class="text-[10px] font-black uppercase px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-950/80 dark:text-emerald-400">Сегодня</span>' : ''}
-            <span class="text-xs text-slate-400 font-medium">${lessonsCount} пар(ы)</span>
+            <span class="text-xs text-slate-400 font-medium">${activeLessonsCount} пара(ы)</span>
           </div>
         </div>
         <div>
-          ${lessonsHTML}
+          ${fullItemsHTML}
         </div>
       `;
     }
@@ -411,12 +470,59 @@
       setTimeout(() => { isProgrammaticScroll = false; }, 350);
     }
 
-    function setupScrollListener() {
+    // Обработка перетаскивания мышью (Drag-to-Scroll) и обычного скролла
+    function setupScrollAndDrag() {
       const slider = document.getElementById('slider-container');
       let timeout = null;
 
+      let isDown = false;
+      let startX;
+      let scrollLeft;
+
+      slider.addEventListener('mousedown', (e) => {
+        isDown = true;
+        startX = e.pageX - slider.offsetLeft;
+        scrollLeft = slider.scrollLeft;
+        slider.style.scrollBehavior = 'auto'; // Отключаем плавность во время перетаскивания мышью
+      });
+
+      slider.addEventListener('mouseleave', () => {
+        if (!isDown) return;
+        isDown = false;
+        slider.style.scrollBehavior = 'smooth';
+        snapToNearest();
+      });
+
+      slider.addEventListener('mouseup', () => {
+        if (!isDown) return;
+        isDown = false;
+        slider.style.scrollBehavior = 'smooth';
+        snapToNearest();
+      });
+
+      slider.addEventListener('mousemove', (e) => {
+        if (!isDown) return;
+        e.preventDefault();
+        const x = e.pageX - slider.offsetLeft;
+        const walk = (x - startX) * 1.5;
+        slider.scrollLeft = scrollLeft - walk;
+      });
+
+      function snapToNearest() {
+        const index = Math.round(slider.scrollLeft / slider.clientWidth);
+        const targetX = index * slider.clientWidth;
+        slider.scrollTo({ left: targetX, behavior: 'smooth' });
+
+        const newDate = new Date(currentMonday);
+        newDate.setDate(newDate.getDate() + index);
+        if (!isSameDate(newDate, selectedDate)) {
+          selectedDate = newDate;
+          renderCalendarHeader();
+        }
+      }
+
       slider.addEventListener('scroll', () => {
-        if (isProgrammaticScroll) return;
+        if (isProgrammaticScroll || isDown) return;
 
         clearTimeout(timeout);
         timeout = setTimeout(() => {
